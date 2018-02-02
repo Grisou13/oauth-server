@@ -1,0 +1,23 @@
+{
+    "name": "thomas.ricci/oauth-server",
+    "description": "Oauth server for datalab.cpnv.ch",
+    "require": {
+        "silex/silex": "^2.2",
+        "doctrine/orm": "^2.6",
+        "symfony/yaml": "^4.0",
+        "doctrine/mongodb-odm": "^1.2",
+        "saxulum/saxulum-doctrine-orm-manager-registry-provider": "~3.0",
+        "symfony/doctrine-bridge": "~2.2",
+        "symfony/form": "~2.2",
+        "symfony/validator": "~2.2",
+        "saxulum/saxulum-doctrine-orm-commands": "~1.2,>=1.2.2",
+        "saxulum/saxulum-console": "~3.1"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Thomas Ricci",
+            "email": "grisou13@hotmail.fr"
+        }
+    ]
+}
