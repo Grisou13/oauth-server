@@ -3,9 +3,9 @@
 require_once __DIR__.'/../vendor/autoload.php';
 
 try {
-    (new Dotenv\Dotenv(__DIR__.'/../'))->load();
+    (new Dotenv\Dotenv(__DIR__.'/../'))->overload();
 } catch (Dotenv\Exception\InvalidPathException $e) {
-    //
+    
 }
 
 /*
@@ -48,6 +48,9 @@ $app->singleton(
     App\Console\Kernel::class
 );
 
+$app->singleton(\Illuminate\Hashing\HashManager::class, function ($app) {
+    return new \Illuminate\Hashing\HashManager($app);
+});
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -110,8 +113,14 @@ $app->router->group([
 |--------------------------------------------------------------------------
 |
 */
-
+\Dusterio\LumenPassport\LumenPassport::allowMultipleTokens();
+/*$app->configure("app");
 $app->configure('auth');
+echo "<pre>";
+echo print_r(config(),true);
 
+echo print_r($_ENV,true);
+echo "</pre>";
+die();*/
 /* ---------------------------------------------------------------------- */
 return $app;

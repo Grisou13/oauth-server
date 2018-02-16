@@ -29,7 +29,7 @@ class ServeCommand extends Command {
         $port = $this->input->getOption('port');
         $base = $this->laravel->basePath();
         $this->info("Lumen development server started on http://{$host}:{$port}/");
-        passthru('"'.PHP_BINARY.'"'." -S {$host}:{$port} -t \"{$base}\"/'public'");
+        passthru('"'.PHP_BINARY.'"'." -S {$host}:{$port} -t \"{$base}\"/public");
     }
     /**
      * Get the console command options.
