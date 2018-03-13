@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
+use \Dusterio\LumenPassport\LumenPassport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,6 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        \Dusterio\LumenPassport\LumenPassport::routes($this->app);
+        LumenPassport::routes($this->app);
+        Passport::enableImplicitGrant();
     }
 }

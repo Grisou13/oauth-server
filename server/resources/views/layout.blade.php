@@ -1,6 +1,6 @@
 <html>
 <head>
-
+    <meta name="auth-token" value="{{ $authToken or null }}" />
 </head>
 <body>
     <h1>

@@ -11,6 +11,9 @@ return [
             'driver' => 'passport',
             'provider' => 'users',
         ],
+        'app' => [
+            'driver' => ''
+        ]
     ],
 
     'providers' => [
@@ -18,5 +21,9 @@ return [
             'driver' => 'eloquent',
             'model' => \App\User::class
         ]
-    ]
+    ],
+    'passwords' => [
+        //
+    ],
+
 ];

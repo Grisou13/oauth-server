@@ -1,6 +1,11 @@
 <template>
   <div id="app">
-    ALJSDJASD
+    <a href="/login"> login </a>
+    <a href="/register"> register </a>
+    
+    <clients />
+    <personal-access-token />
+    <authorized-clients />
   </div>
 </template>
 

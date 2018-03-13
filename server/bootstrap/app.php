@@ -66,6 +66,9 @@ $app->singleton(\Illuminate\Hashing\HashManager::class, function ($app) {
 //    App\Http\Middleware\ExampleMiddleware::class
 // ]);
 
+$app->middleware([
+    App\Http\Middleware\AddCorsHeaders::class
+]);
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
@@ -83,7 +86,7 @@ $app->routeMiddleware([
 */
 
 $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
@@ -113,14 +116,7 @@ $app->router->group([
 |--------------------------------------------------------------------------
 |
 */
-\Dusterio\LumenPassport\LumenPassport::allowMultipleTokens();
-/*$app->configure("app");
+$app->configure("app");
 $app->configure('auth');
-echo "<pre>";
-echo print_r(config(),true);
-
-echo print_r($_ENV,true);
-echo "</pre>";
-die();*/
 /* ---------------------------------------------------------------------- */
 return $app;

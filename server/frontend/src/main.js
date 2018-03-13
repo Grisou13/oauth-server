@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import App from './App.vue'
 import Clients from './Clients.vue'
+import AuthorizedClients from './AuthorizedClients.vue'
+import PersonalAccessToken from './PersonalAccessTokens.vue'
 import VueRouter from 'vue-router'
 
 import 'bootstrap';
@@ -51,6 +53,18 @@ if (token) {
     console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
 }
 
+let auth = document.head.querySelector('meta[name="auth-token"]');
+
+if (auth) {
+    window.axios.defaults.headers.common['Authorization'] = "Baerer: "+auth.content;
+} else {
+    console.error('Auth token not found');
+}
+
+Vue.component("authorized-clients", AuthorizedClients)
+Vue.component("clients", Clients)
+Vue.component("personal-access-token", PersonalAccessToken)
+
 // 2. Define some routes
 // Each route should map to a component. The "component" can
 // either be an actual component constructor created via
@@ -58,7 +72,7 @@ if (token) {
 // We'll talk about nested routes later.
 const routes = [
   { path: '/', component: App },
-  { path: '/clients', component: Clients }
+  // { path: '/clients', component: Clients }
 ]
 
 // 3. Create the router instance and pass the `routes` option

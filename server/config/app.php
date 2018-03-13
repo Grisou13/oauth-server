@@ -1,7 +1,7 @@
 <?php
 
 return [
-    "key"=>env("APP_KEY","IASHGDBJKASLDHAHDGFSDHJFGB"),
+    "key"=>env("APP_KEY",null),
     'cipher' => 'AES-256-CBC',
     'env' => env('APP_ENV', 'production'),
     /*
