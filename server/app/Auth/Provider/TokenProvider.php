@@ -2,6 +2,7 @@
 
 namespace App\Auth;
 
+use Illuminate\Http\Request;
 use Lcobucci\JWT\Parser;
 use App\User; 
 use Carbon\Carbon; 
@@ -9,9 +10,9 @@ use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 
-class Remote implements UserProvider {
+class TokenProvider implements UserProvider {
     protected $request;
-    public function __construct(Illuminte\Http\Request $request){
+    public function __construct(Request $request){
         $this->request = $request;
     }
     /**
@@ -22,23 +23,16 @@ class Remote implements UserProvider {
      */
     public function retrieveById($identifier)
     {
-
-        // TODO: Implement retrieveById() method.
-
-        $token = (new Parser())->parse((string) $this->request->header("Authorization")); // Parses from a string
-        $token->getHeaders(); // Retrieves the token header
-        $token->getClaims(); // Retrieves the token claims
-        $qry = User::where('admin_id','=',$identifier);
+        $qry = User::where('id','=',$identifier);
 
         if($qry->count() >0)
         {
-            $user = $qry->select('admin_id', 'username', 'first_name', 'last_name', 'email', 'password')->first();
+            $user = $qry->select('id', 'credential', 'token', 'password')->first();
 
             $attributes = array(
-                'id' => $user->admin_id,
+                'id' => $user->id,
                 'username' => $user->username,
-                'password' => $user->password,
-                'name' => $user->first_name . ' ' . $user->last_name,
+                'token' => $user->token,
             );
 
             return $user;
@@ -56,7 +50,7 @@ class Remote implements UserProvider {
     public function retrieveByToken($identifier, $token)
     {
         // TODO: Implement retrieveByToken() method.
-        $qry = User::where('admin_id','=',$identifier)->where('remember_token','=',$token);
+        $qry = User::where('id','=',$identifier)->where('remember_token','=',$token);
 
         if($qry->count() >0)
         {

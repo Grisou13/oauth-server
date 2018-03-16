@@ -1,0 +1,18 @@
+{
+    "name": "thomas.ricci/cpnv-oauth2-client",
+    "description": "oauth2 client for cpnv-es.ch",
+    "require": {
+        "league/oauth2-client": "^2.3"
+    },
+    "authors": [
+        {
+            "name": "Thomas Ricci",
+            "email": "grisou13@hotmail.fr"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "CPNVES\\Auth\\Client\\": "src/"
+        }
+    }
+}

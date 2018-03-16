@@ -51,6 +51,11 @@ $app->singleton(
 $app->singleton(\Illuminate\Hashing\HashManager::class, function ($app) {
     return new \Illuminate\Hashing\HashManager($app);
 });
+
+$app->bind(\Illuminate\Session\SessionManager::class, function () use ($app) {
+    return new \Illuminate\Session\SessionManager($app);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -67,11 +72,13 @@ $app->singleton(\Illuminate\Hashing\HashManager::class, function ($app) {
 // ]);
 
 $app->middleware([
+    \Illuminate\Session\Middleware\StartSession::class,
     App\Http\Middleware\AddCorsHeaders::class
 ]);
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+
 ]);
 
 /*
@@ -118,5 +125,7 @@ $app->router->group([
 */
 $app->configure("app");
 $app->configure('auth');
+$app->configure('session');
+
 /* ---------------------------------------------------------------------- */
 return $app;

@@ -13,6 +13,8 @@ use Zend\Diactoros\Response as Psr7Response;
 use League\OAuth2\Server\AuthorizationServer;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
+
+use League\OAuth2\Server\Exception\OAuthServerException;
 class AuthorizationController
 {
     use HandlesOAuthErrors;
@@ -55,22 +57,31 @@ class AuthorizationController
                               TokenRepository $tokens)
     {
         return $this->withErrorHandling(function () use ($psrRequest, $request, $clients, $tokens) {
-            $authRequest = $this->server->validateAuthorizationRequest($psrRequest);
-            $scopes = $this->parseScopes($authRequest);
-            $token = $tokens->findValidToken(
-                $user = $request->user(),
-                $client = $clients->find($authRequest->getClient()->getIdentifier())
-            );
-            if ($token && $token->scopes === collect($scopes)->pluck('id')->all()) {
-                return $this->approveRequest($authRequest, $user);
+            try{
+                $authRequest = $this->server->validateAuthorizationRequest($psrRequest);
+                $scopes = $this->parseScopes($authRequest);
+                $token = $tokens->findValidToken(
+                    $user = $request->user(),
+                    $client = $clients->find($authRequest->getClient()->getIdentifier())
+                );
+                if ($token && $token->scopes === collect($scopes)->pluck('id')->all()) {
+                    return $this->approveRequest($authRequest, $user);
+                }
+                $request->session()->put('authRequest', $authRequest);
+                return $this->response->view('authorize', [
+                    'client' => $client,
+                    'user' => $user,
+                    'scopes' => $scopes,
+                    'request' => $request,
+                ]);
+            }catch(OAuthServerException $e){
+                dd($e);
+                if($e->getErrorType() == "invalid_client" && $e->getHttpStatusCode() == 401){ //user needs to login
+                    return redirect()->to("/login?callback_url=".urlencode($request->fullUrl()));
+                }
+                else
+                    throw $e;
             }
-            $request->session()->put('authRequest', $authRequest);
-            return $this->response->view('authorize', [
-                'client' => $client,
-                'user' => $user,
-                'scopes' => $scopes,
-                'request' => $request,
-            ]);
         });
     }
     /**

@@ -23,11 +23,9 @@ $router->get("/register", function() {
 $router->get("/login", function() {
     return view("login");
 });
-$router->get("/dashboard",function(Request $request){
-    var_dump($_COOKIE);
-    dd($request->user());
+$router->get("/dashboard", ['middleware' => 'auth',function(Request $request){
     return view("dashboard",["authToken"=>$request->user()->token]);
-});
+}]);
 
 function createToken($user){
     
@@ -42,7 +40,11 @@ function createToken($user){
         ->sign($signer, config("app.key")) // creates a signature using "testing" as key
         ->getToken(); // Retrieves the generated token
 }
-
+$router->get("/logout",function(Request $request){
+    $callback_url = $request->get("callback_url",url("/login"));
+    setcookie("token", "", time()-3600);
+    return redirect()->to($callback_url);
+});
 $router->post("/register", function(Request $request) {
     $callback_url = $request->get("callback_url",url("/dashboard"));
 
@@ -59,8 +61,8 @@ $router->post("/register", function(Request $request) {
  * This route will deliver you a token based on the user
  */
 $router->post("/login", function(Request $request) {
-  $callback_url = $request->get("callback_url",url("/login/callback"));
 
+  $callback_url = $request->query("callback_url",null);
   //get a token for the user
   //this should be handled by remote api
     $user = App\User::where("credential",$request->input("credential"))->first();
@@ -73,22 +75,25 @@ $router->post("/login", function(Request $request) {
     
     $query = http_build_query([
         "code"=>(string) $token,
-        "credential"=>$user->credential
+        "credential"=>$user->credential,
+        "callback_url"=>$callback_url
         ]);
         
-    return redirect()->to($callback_url."?".$query);
+    return redirect()->to(url("/login/callback")."?".$query);
 });
 
 // TODO define a scope for this route
-$router->get("/api/profile",function(Request $request){
-    var_dump($request->user());
+$router->get("/api/profile",["middleware"=>"auth:api",function(Request $request){
+    //todo request the profile of the user based on token to the actual profile api
+    //we should get the token of the user
     return $request->user();
-});
+}]);
 /**
  * /login/callback
  * Registers the user credentials
  */
 $router->get("/login/callback",function(Request $request){
+  $callback_url = $request->get("callback_url",url("/dashboard"));
   $access_token = $request->input("code");
   $username = $request->input("credential");
   // get the user from access token
@@ -98,10 +103,14 @@ $router->get("/login/callback",function(Request $request){
   $user->token = $access_token;
   $user->save();
   setcookie("token", $access_token,time() + (86400 * 30), "/");
-  if($request->ajax())
+
+
+
+    if($request->ajax())
     return $access_token;
-  
-  return redirect()->to("/dashboard");
+    //dd(url($callback_url));
+
+  return redirect()->to($callback_url);
   
 });
 /*

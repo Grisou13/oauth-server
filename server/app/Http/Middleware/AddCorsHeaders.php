@@ -21,9 +21,25 @@ class AddCorsHeaders
          * @var $response \Illuminate\Http\Response
          */
         $response = $next($request);
-        // Perform action
-        $response->withHeaders($this->headers);
+        $this->attachHeaders($response);
 
         return $response;
+    }
+    protected function attachHeaders($response){
+        $IlluminateResponse = 'Illuminate\Http\Response';
+        $SymfonyResopnse = 'Symfony\Component\HttpFoundation\Response';
+        if($response instanceof $IlluminateResponse) {
+            foreach ($this->headers as $key => $value) {
+                $response->header($key, $value);
+            }
+            return $response;
+        }
+
+        if($response instanceof $SymfonyResopnse) {
+            foreach ($this->headers as $key => $value) {
+                $response->headers->set($key, $value);
+            }
+            return $response;
+        }
     }
 }
