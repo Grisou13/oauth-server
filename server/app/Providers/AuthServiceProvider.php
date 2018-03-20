@@ -17,7 +17,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+
     }
 
     /**
@@ -43,13 +43,14 @@ class AuthServiceProvider extends ServiceProvider
 
         });
         $this->app['auth']->viaRequest('api', function ($request) {
+
             if(array_key_exists("token",$_COOKIE)){
                 return User::where("token",$_COOKIE["token"])->first();
             }
             if ($request->header('Authorization')) {
-                $response = explode(':', $request->header('Authorization'));
-                dd($response);
-                $token = trim($response[2]);
+
+                $response = explode(' ', $request->header('Authorization'));
+                $token = trim($response[1]);
                 return User::where('token', $token)->first();
             }
         });

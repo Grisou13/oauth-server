@@ -75,7 +75,7 @@ class AuthorizationController
                     'request' => $request,
                 ]);
             }catch(OAuthServerException $e){
-                dd($e);
+                //dd($e);
                 if($e->getErrorType() == "invalid_client" && $e->getHttpStatusCode() == 401){ //user needs to login
                     return redirect()->to("/login?callback_url=".urlencode($request->fullUrl()));
                 }

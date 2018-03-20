@@ -3,7 +3,7 @@ require_once 'vendor/autoload.php';
 session_start();
 use CPNVES\Auth\Client\Client;
 
-$provider = new Client("2","8WnkZDJ4Y3B1PQboXwylujaXRpamBPR8zT2hp084","http://localhost:8080/");
+$provider = new Client("3","Cur5DZCxnr3P8PpivJD8LR1fysUOFj0jORkSMLEd","http://localhost:8080/");
 // If we don't have an authorization code then get one
 if (!isset($_GET['code'])) {
 
@@ -11,7 +11,7 @@ if (!isset($_GET['code'])) {
     // urlAuthorize option and generates and applies any necessary parameters
     // (e.g. state).
     $authorizationUrl = $provider->getAuthorizationUrl();
-    
+
     // Get the state generated for you and store it to the session.
     $_SESSION['oauth2state'] = $provider->getState();
 
@@ -25,10 +25,12 @@ if (!isset($_GET['code'])) {
     if (isset($_SESSION['oauth2state'])) {
         unset($_SESSION['oauth2state']);
     }
-    
+
     exit('Invalid state');
 } elseif(isset($_SESSION["TOKEN"])) {
     echo "TAMER";
+    echo PHP_EOL;
+    echo $_SESSION["TOKEN"];
     $token = new League\OAuth2\Client\Token\AccessToken(['access_token' => $_SESSION["TOKEN"]]);
     $provider->getResourceOwner($token);
 } else {
@@ -47,12 +49,12 @@ if (!isset($_GET['code'])) {
         echo 'Expired in: ' . $accessToken->getExpires() . "<br>";
         echo 'Already expired? ' . ($accessToken->hasExpired() ? 'expired' : 'not expired') . "<br>";
             $_SESSION["TOKEN"] = $accessToken->getToken();
-        
+
         header("Location: http://localhost:8080");
             // Using the access token, we may look up details about the
         // resource owner.
         $resourceOwner = $provider->getResourceOwner($accessToken);
-        
+
         var_export($resourceOwner->toArray());
 
         // The provider provides a way to get an authenticated API request for

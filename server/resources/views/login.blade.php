@@ -6,4 +6,5 @@
         <input type="password" name="password" >
         <button><span>Log in</span></button>
     </form>
+    <button type="button"><a href="/register?{{ \Illuminate\Support\Facades\Request::getQueryString() }}">Register</a></button>
 @endsection

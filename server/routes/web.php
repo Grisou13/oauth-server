@@ -28,7 +28,7 @@ $router->get("/dashboard", ['middleware' => 'auth',function(Request $request){
 }]);
 
 function createToken($user){
-    
+
     $signer = new Sha256();
     return (new Builder())->setIssuer(url()) // Configures the issuer (iss claim)
         ->setAudience(url()) // Configures the audience (aud claim)
@@ -54,7 +54,12 @@ $router->post("/register", function(Request $request) {
     $user->save();
     $user->token = createToken($user);
     $user->save();
-    return redirect()->to($callback_url);
+    $query = http_build_query([
+        "code"=>(string) $user->token,
+        "credential"=>$user->credential,
+        "callback_url"=>$callback_url
+    ]);
+    return redirect()->to("/login/callback?".$query);
 });
 /**
  * /login
@@ -72,13 +77,13 @@ $router->post("/login", function(Request $request) {
         return response("invalid password", 401);
 
     $token = createToken($user);
-    
+
     $query = http_build_query([
         "code"=>(string) $token,
         "credential"=>$user->credential,
         "callback_url"=>$callback_url
         ]);
-        
+
     return redirect()->to(url("/login/callback")."?".$query);
 });
 
@@ -86,7 +91,7 @@ $router->post("/login", function(Request $request) {
 $router->get("/api/profile",["middleware"=>"auth:api",function(Request $request){
     //todo request the profile of the user based on token to the actual profile api
     //we should get the token of the user
-    return $request->user();
+    return \Auth::guard('api')->user();
 }]);
 /**
  * /login/callback
@@ -111,7 +116,7 @@ $router->get("/login/callback",function(Request $request){
     //dd(url($callback_url));
 
   return redirect()->to($callback_url);
-  
+
 });
 /*
  * https://here/authorize?
