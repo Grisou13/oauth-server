@@ -3,7 +3,9 @@ require_once 'vendor/autoload.php';
 session_start();
 use CPNVES\Auth\Client\Client;
 
-$provider = new Client("3","Cur5DZCxnr3P8PpivJD8LR1fysUOFj0jORkSMLEd","http://localhost:8080/");
+$clientId = "3";
+$clientSecret = "Cur5DZCxnr3P8PpivJD8LR1fysUOFj0jORkSMLEd";
+$provider = new Client($clientId, $clientSecret,"http://localhost:8080/");
 // If we don't have an authorization code then get one
 if (!isset($_GET['code'])) {
 
@@ -32,7 +34,7 @@ if (!isset($_GET['code'])) {
     echo PHP_EOL;
     echo $_SESSION["TOKEN"];
     $token = new League\OAuth2\Client\Token\AccessToken(['access_token' => $_SESSION["TOKEN"]]);
-    $provider->getResourceOwner($token);
+    echo print_r($provider->getResourceOwner($token)->toArray(),true);
 } else {
 
     try {
