@@ -7,10 +7,10 @@
 </template>
 
 <script>
-import "./app.sass"
+import "../app.sass"
 
 export default {
-  name: 'app',
+  name: 'dashboard',
   data () {
     return {
 

@@ -1,8 +1,11 @@
 import Vue from 'vue'
-import App from './App.vue'
-import Clients from './Clients.vue'
-import AuthorizedClients from './AuthorizedClients.vue'
-import PersonalAccessToken from './PersonalAccessTokens.vue'
+import Dashboard from './Dashboard/Dashboard.vue'
+import Clients from './Dashboard/Clients.vue'
+import AuthorizedClients from './Dashboard/AuthorizedClients.vue'
+import PersonalAccessToken from './Dashboard/PersonalAccessTokens.vue'
+
+import Project from './Project/ProjectTable'
+import ScopesTable from './Project/ScopeTable'
 import VueRouter from 'vue-router'
 
 import 'bootstrap';
@@ -33,7 +36,7 @@ try {
  */
 const axios = require('axios');
 window.axios = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: window.BASE_URL || window.location.url,
   headers: {
     'X-Requested-With' : 'XMLHttpRequest'
   }
@@ -56,7 +59,7 @@ if (token) {
 let auth = document.head.querySelector('meta[name="auth-token"]');
 
 if (auth) {
-    window.axios.defaults.headers.common['Authorization'] = "Baerer: "+auth.content;
+    window.axios.defaults.headers.common['Authorization'] = "Baerer "+auth.content;
 } else {
     console.error('Auth token not found');
 }
@@ -64,6 +67,7 @@ if (auth) {
 Vue.component("authorized-clients", AuthorizedClients)
 Vue.component("clients", Clients)
 Vue.component("personal-access-token", PersonalAccessToken)
+Vue.component("scopes-table", ScopesTable)
 
 // 2. Define some routes
 // Each route should map to a component. The "component" can
@@ -71,7 +75,8 @@ Vue.component("personal-access-token", PersonalAccessToken)
 // `Vue.extend()`, or just a component options object.
 // We'll talk about nested routes later.
 const routes = [
-  { path: '/', component: App },
+  { path: '/clients', component: Dashboard },
+  { path: '/projects', component: Project}
   // { path: '/clients', component: Clients }
 ]
 

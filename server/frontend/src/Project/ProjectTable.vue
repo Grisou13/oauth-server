@@ -4,31 +4,38 @@
         Add new project
     </a>
 
-    <table>
+    <table class="table">
         <thead>
         <tr>
             <th>Name</th>
+            <th>url</th>
             <th>Description</th>
             <th></th>
             <th></th>
         </tr>
         </thead>
         <tbody>
-        <tr v-for="project in projects">
-            <td class="name">{{ project.name }}</td>
-            <td class="description">{{ project.description }}</td>
-            <td><a href="#" class="btn edit"><i class="material-icons" @click="showProjectEditForm(project)">edit</i></a></td>
-            <td><a href="#" class="btn delete"><i class="material-icons" @click="destroy(project)">delete</i></a></td>
-        </tr>
+            <tr v-for="project in projects" data-toggle="collapse" data-target="#accordion-{{ project.id }}" class="clickable">
+                <td class="name">{{ project.name }}</td>
+                <td class="url">{{ project.url }}</td>
+                <td class="description">{{ project.description }}</td>
+                <td><a href="#" class="btn edit"><i class="material-icons" @click="showProjectEditForm(project)">edit</i></a></td>
+                <td><a href="#" class="btn delete"><i class="material-icons" @click="destroy(project)">delete</i></a></td>
+            </tr>
+            <tr v-for="project in projects">
+                <td colspan="5">
+                    <div id="accordion-{{ project.id }}" class="collapse"><scopes-table project="project.id"></scopes-table></div>
+                </td>
+            </tr>
         </tbody>
     </table>
-    <!-- Edit form -->
+    <!-- Create form -->
     <div class="modal fade" id="modal-create-project" tabindex="-1" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">
-                        Edit project
+                        Create project
                     </h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -90,6 +97,7 @@
                             </div>
                         </div>
                     </form>
+
                 </div>
 
                 <!-- Modal Actions -->
@@ -187,7 +195,10 @@
 </template>
 
 <script>
+    import ScopesTable from "./ScopeTable";
+
     export default {
+        components: {ScopesTable},
         name: 'projects-table',
         props: ["project"],
         data () {

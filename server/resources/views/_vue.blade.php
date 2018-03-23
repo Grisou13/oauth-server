@@ -1,11 +1,13 @@
 <div id="app">
-    <h1>Hello App!</h1>
-    <p>
-        <!-- use router-link component for navigation. -->
-        <!-- specify the link by passing the `to` prop. -->
-        <!-- `<router-link>` will be rendered as an `<a>` tag by default -->
-        <!-- <router-link to="/">Go to /</router-link> -->
-    </p>
+    <h1>Welcome to your dashboard</h1>
+    <div class="row">
+        <h2>Manage your apis</h2>
+        <router-link to="/clients">Manager your api clients</router-link>
+    </div>
+    <div class="row">
+        <h2>Manage your api clients</h2>
+        <router-link to="/projects">Manager your apis</router-link>
+    </div>
     <!-- route outlet -->
     <!-- component matched by the route will render here -->
     <router-view></router-view>

@@ -4,7 +4,7 @@
         Add new scope
     </a>
 
-    <table>
+    <table class="table">
         <thead>
         <tr>
             <th>Name</th>
