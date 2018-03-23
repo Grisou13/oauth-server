@@ -63,11 +63,10 @@ if (auth) {
 } else {
     console.error('Auth token not found');
 }
-
+console.log($.fn.modal)
 Vue.component("authorized-clients", AuthorizedClients)
 Vue.component("clients", Clients)
 Vue.component("personal-access-token", PersonalAccessToken)
-Vue.component("scopes-table", ScopesTable)
 
 // 2. Define some routes
 // Each route should map to a component. The "component" can

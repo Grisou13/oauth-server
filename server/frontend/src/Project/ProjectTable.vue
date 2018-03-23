@@ -1,5 +1,5 @@
 <template>
-
+<div>
     <a class="action-link" tabindex="-1" @click="showProjectCreateForm">
         Add new project
     </a>
@@ -15,7 +15,7 @@
         </tr>
         </thead>
         <tbody>
-            <tr v-for="project in projects" data-toggle="collapse" data-target="#accordion-{{ project.id }}" class="clickable">
+            <tr v-for="project in projects" data-toggle="collapse" :data-target="'#accordion-'+ project.id " class="clickable">
                 <td class="name">{{ project.name }}</td>
                 <td class="url">{{ project.url }}</td>
                 <td class="description">{{ project.description }}</td>
@@ -24,7 +24,7 @@
             </tr>
             <tr v-for="project in projects">
                 <td colspan="5">
-                    <div id="accordion-{{ project.id }}" class="collapse"><scopes-table project="project.id"></scopes-table></div>
+                    <div v-bind:id="'accordion-'+project.id " class="collapse"><scopes-table project="project.id"></scopes-table></div>
                 </td>
             </tr>
         </tbody>
@@ -191,7 +191,7 @@
             </div>
         </div>
     </div>
-
+</div>
 </template>
 
 <script>

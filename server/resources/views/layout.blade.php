@@ -3,6 +3,7 @@
     <script>
         window.BASE_URL="{{ url("/") }}"
     </script>
+    @stack("styles")
     <meta name="auth-token" value="{{ $authToken or null }}" />
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -18,10 +19,11 @@
         @yield("content")
     </div>
 
-    @stack("scripts")
     <script src="{{ url("js/vendor/jquery.js") }}"></script>
     <script src="{{ url("js/vendor/what-input.js") }}"></script>
-    <script src="{{ url("js/vendor/materialize.min.js") }}"></script>
+    <script src="{{ url("js/vendor/materialize.js") }}"></script>
     <script src="{{ url("js/app.js") }}"></script>
+    @stack("scripts")
+
 </body>
 </html>

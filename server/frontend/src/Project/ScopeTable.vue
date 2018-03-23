@@ -1,5 +1,5 @@
 <template>
-
+<div>
     <a class="action-link" tabindex="-1" @click="showScopeCreateForm">
         Add new scope
     </a>
@@ -156,7 +156,7 @@
             </div>
         </div>
     </div>
-
+</div>
 </template>
 
 <script>
