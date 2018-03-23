@@ -1,8 +1,5 @@
 <template>
   <div id="app">
-    <a href="/login"> login </a>
-    <a href="/register"> register </a>
-    
     <clients />
     <personal-access-token />
     <authorized-clients />
@@ -16,7 +13,7 @@ export default {
   name: 'app',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+
     }
   }
 }

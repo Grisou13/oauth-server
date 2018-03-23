@@ -14,6 +14,10 @@ use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use \Illuminate\Http\Request;
 
+/**
+ * @var $router Illuminate\Routing\Router
+ */
+
 $router->get('/', function () use ($router) {
     return view("home");
 });
@@ -23,9 +27,139 @@ $router->get("/register", function() {
 $router->get("/login", function() {
     return view("login");
 });
-$router->get("/dashboard", ['middleware' => 'auth',function(Request $request){
-    return view("dashboard",["authToken"=>$request->user()->token]);
-}]);
+
+$router->get("/tutorial", function(){
+   return view("tutorial");
+});
+
+$router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use ($router) {
+    /**
+     * Root of dashboard
+     */
+    $router->get("/",function(Request $request){
+        return view("dashboard",["authToken"=>$request->user()->token]);
+    });
+    /**
+     * Handle oauth clients
+     */
+    $router->get("/clients", function(){
+        return view("clients");
+    });
+
+
+    $router->group(["prefix"=>"projects"], function() use($router){
+        /**
+         * View all my projects
+         */
+        $router->get("/", function(Request $request){
+            $projects = \App\Project::all();
+            if($request->ajax())
+                return $projects->toJson();
+
+            return view("project.list", compact("projects"));
+
+        });
+        /**
+         * View details of a project
+         */
+        $router->get("/{id}", function($id, Request $request){
+            $project = \App\Project::findOrFail($id);
+            if($request->ajax())
+                return $project->toJson();
+
+            return view("project.list", compact("project"));
+        });
+
+        /**
+         * Update a project
+         */
+        $router->put("/{id}", function($id, Request $request){
+            //update the project
+            $project = \App\Project::findOrFail($id);
+            $project->fill($request->except("scopes"));
+            //save the stuff
+            $project->saveOrFail();
+            if($request->ajax())
+                return $project->toJson();
+
+            return redirect()->to("/dashboard/projects/".$project->id);
+        });
+        /**
+         * Create a project
+         */
+        $router->post("/", function(Request $request){
+            //create the project
+            $project = new \App\Project();
+            $project->fill($request->except("scopes"));
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $project->user()->associate($user);
+            //save everything
+            $project->saveOrFail();
+
+            if($request->ajax())
+                return $project->toJson();
+
+            return redirect()->to("/dashboard/projects");
+        });
+
+        $router->group(["prefix"=>"{project_id}/scopes"], function() use ($router){
+            /**
+             * View all my scopes for a project
+             */
+            $router->get("/", function($project_id, Request $request){
+                $project = \App\Project::findOrFail($project_id);
+                $scopes = $project->scopes();
+                return $scopes->toJson();
+            });
+            /**
+             * View details of a scope
+             */
+            $router->get("/{id}", function($id, $project_id,  Request $request){
+                $scope = \App\Scope::findOrFail($project_id);
+                return $scope->toJson();
+            });
+
+            /**
+             * Update a project
+             */
+            $router->put("/{id}", function($id, $project_id,  Request $request){
+                $project = \App\Project::findOrFail($project_id);
+
+                //update the project
+                $scope = \App\Scope::findOrFail($id);
+                $scope->fill($request->except("scopes"));
+                //update or create new scopes
+
+                //save the stuff
+                $scope->saveOrFail();
+                if($request->ajax())
+                    return $scope->toJson();
+
+                return redirect()->to("/dashboard/projects/".$scope->project->id);
+            });
+            /**
+             * Create a scope
+             */
+            $router->post("/", function($project_id, Request $request){
+                $project = \App\Project::findOrFail($project_id);
+
+                //create the project
+                $scope = new \App\Scope();
+                $scope->fill($request->except("scopes"));
+                $scope->project()->associate($project);
+                //save everything
+                $scope->saveOrFail();
+
+                if($request->ajax())
+                    return $scope->toJson();
+
+                return redirect()->to("/dashboard/projects/".$scope->project->id);
+            });
+        });
+
+    });
+});
+
 
 function createToken($user){
 
@@ -61,6 +195,13 @@ $router->post("/register", function(Request $request) {
     ]);
     return redirect()->to("/login/callback?".$query);
 });
+
+function localLogin(){
+
+}
+function remoteLogin(){
+
+}
 /**
  * /login
  * This route will deliver you a token based on the user
@@ -68,13 +209,24 @@ $router->post("/register", function(Request $request) {
 $router->post("/login", function(Request $request) {
 
   $callback_url = $request->query("callback_url",null);
-  //get a token for the user
-  //this should be handled by remote api
+
+  //TODO this should be handled by remote api
+
+    //check if we have a user
     $user = App\User::where("credential",$request->input("credential"))->first();
-    if(!$user)
-        return response("No user", 401);
-    if(!app("hash")->check($request->input("password"),$user->password))
-        return response("invalid password", 401);
+    if(!$user){
+        if($request->ajax())
+            return response("No user", 401);
+        else
+            return redirect()->to("/login?error=user-not-found");
+    }
+    //make sure password matches
+    if(!app("hash")->check($request->input("password"),$user->password)){
+        if($request->ajax())
+            return response("invalid password", 401);
+        else
+            return redirect()->to("/login?error=incorrect-password");
+    }
 
     $token = createToken($user);
 
