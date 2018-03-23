@@ -1,7 +1,7 @@
 <html>
 <head>
     <script>
-        window.BASE_URL={{ url("/") }}
+        window.BASE_URL="{{ url("/") }}"
     </script>
     <meta name="auth-token" value="{{ $authToken or null }}" />
     <meta charset="utf-8">
