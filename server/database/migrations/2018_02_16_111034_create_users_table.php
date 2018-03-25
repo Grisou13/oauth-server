@@ -15,10 +15,10 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
-            $table->text("token"); //this token is used to request data on micro service api for the cpnv
+            $table->text("token")->nullable(); //this token is used to request data on micro service api for the cpnv
             $table->string("credential")->unique();
             $table->string("password")->nullable();
-            $table->string('remember_token', 255);
+            $table->string('remember_token', 255)->nullable();
             $table->timestamps();
         });
     }
