@@ -3248,7 +3248,7 @@ $jscomp.polyfill = function (e, r, p, m) {
   M.Modal = Modal;
 
   if (M.jQueryLoaded) {
-    M.initializeJqueryWrapper(Modal, 'modalMat', 'M_Modal');
+    M.initializeJqueryWrapper(Modal, 'modal', 'M_Modal');
   }
 })(cash, M.anime);
 ;(function ($, anim) {

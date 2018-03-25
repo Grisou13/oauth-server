@@ -52,7 +52,7 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
          * View all my projects
          */
         $router->get("/", function(Request $request){
-            $projects = \App\Project::all();
+            $projects = \App\Project::where("user_id","=", \Illuminate\Support\Facades\Auth::user()->id)->get();
             if($request->ajax())
                 return $projects->toJson();
 
@@ -64,12 +64,17 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
          */
         $router->get("/{id}", function($id, Request $request){
             $project = \App\Project::findOrFail($id);
-            if($request->ajax())
-                return $project->toJson();
-
-            return view("project.list", compact("project"));
+            return $project->toJson();
         });
+        /**
+        * Delete a project
+        */
+        $router->delete("/{id}", function($id, Request $request){
+            $project = \App\Project::findOrFail($id);
+            $project->delete();
 
+            return '';
+        });
         /**
          * Update a project
          */
@@ -108,22 +113,30 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
              */
             $router->get("/", function($project_id, Request $request){
                 $project = \App\Project::findOrFail($project_id);
-                $scopes = $project->scopes();
+                $scopes = $project->scopes;
                 return $scopes->toJson();
             });
             /**
              * View details of a scope
              */
             $router->get("/{id}", function($id, $project_id,  Request $request){
-                $scope = \App\Scope::findOrFail($project_id);
+                $scope = \App\Scope::findOrFail($id);
                 return $scope->toJson();
+            });
+            /**
+             * Delete a scope
+             */
+            $router->delete("/{id}", function($id, $project_id,  Request $request){
+                $scope = \App\Scope::findOrFail($id);
+                $scope->delete();
+                return '';
             });
 
             /**
              * Update a project
              */
             $router->put("/{id}", function($id, $project_id,  Request $request){
-                $project = \App\Project::findOrFail($project_id);
+                //$project = \App\Project::findOrFail($project_id);
 
                 //update the project
                 $scope = \App\Scope::findOrFail($id);

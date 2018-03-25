@@ -5,12 +5,9 @@ import AuthorizedClients from './Dashboard/AuthorizedClients.vue'
 import PersonalAccessToken from './Dashboard/PersonalAccessTokens.vue'
 
 import Project from './Project/ProjectTable'
+import ProjectDetail from './Project/ProjectDetail'
 import ScopesTable from './Project/ScopeTable'
 import VueRouter from 'vue-router'
-
-import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-
 
 Vue.use(VueRouter)
 
@@ -26,7 +23,7 @@ window.Vue = require('vue');
 try {
     window.$ = window.jQuery = require('jquery');
 
-    require('bootstrap');
+    //require('bootstrap');
 } catch (e) {}
 
 /**
@@ -75,7 +72,9 @@ Vue.component("personal-access-token", PersonalAccessToken)
 // We'll talk about nested routes later.
 const routes = [
   { path: '/clients', component: Dashboard },
-  { path: '/projects', component: Project}
+  { path: '/projects', component: Project},
+  { path: '/projects/:id', component: ProjectDetail}
+
   // { path: '/clients', component: Clients }
 ]
 
@@ -89,6 +88,7 @@ const router = new VueRouter({
 // 4. Create and mount the root instance.
 // Make sure to inject the router with the router option to make the
 // whole app router-aware.
+
 const app = new Vue({
   router
 }).$mount('#app')

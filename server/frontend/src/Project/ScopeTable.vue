@@ -13,8 +13,8 @@
             <th></th>
         </tr>
         </thead>
-        <tbody>
-            <tr v-for="scope in scopes">
+        <tbody v-if="scopes.length > 0">
+            <tr  v-for="scope in scopes">
                 <td class="name">{{ scope.name }}</td>
                 <td class="description">{{ scope.description }}</td>
                 <td><a href="#" class="btn edit"><i class="material-icons" @click="showScopeEditForm(scope)">edit</i></a></td>
@@ -31,7 +31,6 @@
                         Edit Scope
                     </h4>
 
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
 
                 <div class="modal-body">
@@ -98,7 +97,6 @@
                         Edit Scope
                     </h4>
 
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
 
                 <div class="modal-body">
@@ -162,9 +160,9 @@
 <script>
     export default {
         name: 'scopes-table',
-        props: ["project"],
         data () {
             return {
+                project: this.$route.params.id,
                 scopes: [],
                 //project: window.project || this.project,
                 selectedScope: null,
@@ -197,23 +195,32 @@
         methods: {
             prepareComponent() {
                 this.getScopes();
-
-                $('#modal-create-scope').on('shown.bs.modal', () => {
+                M.Modal.init($('#modal-create-scope'), {
+                  onOpenEnd: function(){
                     $('#create-scope-name').focus();
-                });
-
-                $('#modal-edit-scope').on('shown.bs.modal', () => {
+                  }
+                })
+                M.Modal.init($('#modal-edit-scope'), {
+                  onOpenEnd: function(){
                     $('#edit-scope-name').focus();
-                });
+                  }
+                })
+
             },
-            call(method, url = '', form = null){
-              return axios[method]($`/project/${this.project}/scopes${url}`, form).then(resp => {
+            call(method, url = '', form = null, modal = false){
+              console.log(url)
+              console.log(`/projects/${url}`)
+              console.log(this.project)
+              return axios[method](`/dashboard/projects/${this.project}/scopes/${url}`, form).then(resp => {
                   form.name = ''
                   form.description = ''
                   form.errors = []
+                  if(modal)
+                    M.Modal.getInstance($(modal)).close()
                   return resp.data
 
               }).catch(error => {
+                console.error(error)
                   if (typeof error.response.data === 'object') {
                       form.errors = _.flatten(_.toArray(error.response.data.errors));
                   } else {
@@ -222,15 +229,15 @@
               });
             },
             getScopes(){
-                this.call("get")
+                axios.get(`/dashboard/projects/${this.project}/scopes`).then(resp => this.scopes = resp.data)
             },
             update(){
-                this.call("patch","/"+this.editForm.id, this.editForm).then(resp => {
+                this.call("patch",this.editForm.id, this.editForm, "#modal-edit-scope").then(resp => {
                     this.getScopes()
                 })
             },
             create(){
-                this.call("post",'', this.createForm).then(resp => {
+                this.call("post",'', this.createForm,"#modal-create-scope").then(resp => {
                     this.scopes.push(resp.data)
                 })
             },
@@ -238,14 +245,14 @@
                 this.editForm.id = scope.id;
                 this.editForm.name = scope.name;
                 this.editForm.description = scope.description;
+                M.Modal.getInstance($('#modal-edit-scope')).open()
 
-                $('#modal-edit-scope').modal('show');
             },
             showScopeCreateForm(){
-                $('#modal-create-scope').modal('show');
+                M.Modal.getInstance($('#modal-create-scope')).open()
             },
             destroy(scope){
-                this.call("delete", "/"+scope.id).then(resp => {
+                this.call("delete", scope.id).then(resp => {
                     this.getScopes()
                 })
             }

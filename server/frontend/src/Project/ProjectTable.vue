@@ -12,118 +12,96 @@
             <th>Description</th>
             <th></th>
             <th></th>
+            <th></th>
         </tr>
         </thead>
-        <tbody>
-            <tr v-for="project in projects" data-toggle="collapse" :data-target="'#accordion-'+ project.id " class="clickable">
-                <td class="name">{{ project.name }}</td>
-                <td class="url">{{ project.url }}</td>
-                <td class="description">{{ project.description }}</td>
-                <td><a href="#" class="btn edit"><i class="material-icons" @click="showProjectEditForm(project)">edit</i></a></td>
+        <tbody v-if="projects.length > 0">
+            <tr  v-for="project in projects" class="clickable">
+                <td class="">{{ project.name }}</td>
+                <td class="">{{ project.url }}</td>
+                <td class="">{{ project.description }}</td>
+                <td><a href="#" class="btn edit"  @click="showProjectEditForm(project)"><i class="material-icons" >edit</i></a></td>
+                <td><a href="#" class="btn show"  @click="openProject(project)"><i class="material-icons">remove_red_eye</i></a></td>
                 <td><a href="#" class="btn delete"><i class="material-icons" @click="destroy(project)">delete</i></a></td>
-            </tr>
-            <tr v-for="project in projects">
-                <td colspan="5">
-                    <div v-bind:id="'accordion-'+project.id " class="collapse"><scopes-table project="project.id"></scopes-table></div>
-                </td>
             </tr>
         </tbody>
     </table>
     <!-- Create form -->
     <div class="modal fade" id="modal-create-project" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">
-                        Create project
-                    </h4>
+          <div class="modal-content">
+              <h4 class="modal-title">
+                  Create project
+              </h4>
+              <!-- Form Errors -->
+              <div class="alert alert-danger" v-if="createForm.errors.length > 0">
+                  <p class="mb-0"><strong>Whoops!</strong> Something went wrong!</p>
+                  <br>
+                  <ul>
+                      <li v-for="error in createForm.errors">
+                          {{ error }}
+                      </li>
+                  </ul>
+              </div>
 
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
+              <!-- Edit Project Form -->
+              <form role="form">
+                  <!-- Name -->
+                  <div class="form-group row">
+                      <label class="col-md-3 col-form-label">Name</label>
 
-                <div class="modal-body">
-                    <!-- Form Errors -->
-                    <div class="alert alert-danger" v-if="createForm.errors.length > 0">
-                        <p class="mb-0"><strong>Whoops!</strong> Something went wrong!</p>
-                        <br>
-                        <ul>
-                            <li v-for="error in createForm.errors">
-                                {{ error }}
-                            </li>
-                        </ul>
-                    </div>
+                      <div class="col-md-9">
+                          <input id="create-project-name" type="text" class="form-control"
+                                 @keyup.enter="create" v-model="createForm.name">
 
-                    <!-- Edit Project Form -->
-                    <form role="form">
-                        <!-- Name -->
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label">Name</label>
+                          <span class="form-text text-muted">
+                                  Name of the api.
+                              </span>
+                      </div>
+                  </div>
 
-                            <div class="col-md-9">
-                                <input id="create-project-name" type="text" class="form-control"
-                                       @keyup.enter="create" v-model="createForm.name">
+                  <!-- Url -->
+                  <div class="form-group row">
+                      <label class="col-md-3 col-form-label">Url</label>
 
-                                <span class="form-text text-muted">
-                                        Name of the api.
-                                    </span>
-                            </div>
-                        </div>
+                      <div class="col-md-9">
+                          <input  type="text" class="form-control"
+                                 @keyup.enter="create" v-model="createForm.url">
 
-                        <!-- Name -->
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label">Name</label>
+                          <span class="form-text text-muted">
+                                  Url of the api.
+                              </span>
+                      </div>
+                  </div>
 
-                            <div class="col-md-9">
-                                <input  type="text" class="form-control"
-                                       @keyup.enter="create" v-model="createForm.url">
+                  <!-- Description -->
+                  <div class="form-group row">
+                      <label class="col-md-3 col-form-label">Description</label>
 
-                                <span class="form-text text-muted">
-                                        Url of the api.
-                                    </span>
-                            </div>
-                        </div>
+                      <div class="col-md-9">
+                          <input type="text" class="form-control" name="description"
+                                 @keyup.enter="create" v-model="createForm.description">
 
-                        <!-- Description -->
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label">Description</label>
-
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="description"
-                                       @keyup.enter="create" v-model="createForm.description">
-
-                                <span class="form-text text-muted">
-                                        Why, and for what will this api be used for.
-                                    </span>
-                            </div>
-                        </div>
-                    </form>
-
-                </div>
-
-                <!-- Modal Actions -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                    <button type="button" class="btn btn-primary" @click="create">
-                        Save Changes
-                    </button>
-                </div>
+                          <span class="form-text text-muted">
+                                  Why, and for what will this api be used for.
+                              </span>
+                      </div>
+                  </div>
+              </form>
             </div>
-        </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal('#modal-create-project')">Close</button>
+
+                <button type="button" class="btn btn-primary" @click="create">
+                    Save Changes
+                </button>
+            </div>
     </div>
     <!-- Edit form -->
     <div class="modal fade" id="modal-edit-project" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
                     <h4 class="modal-title">
                         Edit project
                     </h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
-
-                <div class="modal-body">
                     <!-- Form Errors -->
                     <div class="alert alert-danger" v-if="editForm.errors.length > 0">
                         <p class="mb-0"><strong>Whoops!</strong> Something went wrong!</p>
@@ -152,7 +130,7 @@
                         </div>
                         <!-- Url -->
                         <div class="form-group row">
-                            <label class="col-md-3 col-form-label">Name</label>
+                            <label class="col-md-3 col-form-label">Url</label>
 
                             <div class="col-md-9">
                                 <input type="text" class="form-control"
@@ -179,19 +157,17 @@
                         </div>
                     </form>
                 </div>
-
                 <!-- Modal Actions -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal('#modal-edit-project')">Close</button>
 
                     <button type="button" class="btn btn-primary" @click="update">
                         Save Changes
                     </button>
                 </div>
-            </div>
+
         </div>
-    </div>
-</div>
+      </div>
 </template>
 
 <script>
@@ -201,6 +177,10 @@
         components: {ScopesTable},
         name: 'projects-table',
         props: ["project"],
+        modals: {
+          edit: null,
+          create: null
+        },
         data () {
             return {
                 projects: [],
@@ -234,25 +214,36 @@
             this.prepareComponent();
         },
         methods: {
+            closeModal(node){
+              M.Modal.getInstance($(node)).close()
+            },
             prepareComponent() {
                 this.getProjects();
+                M.Modal.init($("#modal-create-project"),{
+                    onOpenEnd: function(){
+                      $('#create-project-name').focus();
+                    }
+                })
+                M.Modal.init($("#modal-edit-project"),{
+                    onOpenEnd: function(){
+                      $('#edit-project-name').focus();
+                    }
+                })
 
-                $('#modal-create-project').on('shown.bs.modal', () => {
-                    $('#create-project-name').focus();
-                });
-
-                $('#modal-edit-project').on('shown.bs.modal', () => {
-                    $('#edit-project-name').focus();
-                });
             },
-            call(method, url = '', form = null){
-                return axios[method]($`/project/${this.project}${url}`, form).then(resp => {
+            call(method, url = '', form = {}, modal = null){
+                console.log(url)
+
+                return axios[method](`/dashboard/projects/${url}`, form).then(resp => {
                     form.name = ''
                     form.description = ''
                     form.errors = []
+                    if(modal)
+                      M.Modal.getInstance($(modal)).close()
                     return resp.data
 
                 }).catch(error => {
+                  console.error(error)
                     if (typeof error.response.data === 'object') {
                         form.errors = _.flatten(_.toArray(error.response.data.errors));
                     } else {
@@ -260,16 +251,19 @@
                     }
                 });
             },
+            openProject(project){
+              this.$router.push('/projects/'+project.id)
+            },
             getProjects(){
-                this.call("get")
+                return axios.get("/dashboard/projects").then(resp => this.projects = resp.data)
             },
             update(){
-                this.call("patch",this.editForm.id, this.editForm).then(resp => {
+                this.call("patch",this.editForm.id, this.editForm, "#modal-edit-project").then(resp => {
                     this.getProjects()
                 })
             },
             create(){
-                this.call("post",'', this.createForm).then(resp => {
+                this.call("post",'', this.createForm,"#modal-create-project").then(resp => {
                     this.projects.push(resp.data)
                 })
             },
@@ -278,13 +272,14 @@
                 this.editForm.name = project.name;
                 this.editForm.description = project.description;
 
-                $('#modal-edit-project').modal('show');
+                M.Modal.getInstance($('#modal-edit-project')).open();
             },
             showProjectCreateForm(){
-                $('#modal-create-project').modal('show');
+                M.Modal.getInstance($('#modal-create-project')).open();
             },
             destroy(project){
-                this.call("delete", "/"+project.id).then(resp => {
+              console.log(project)
+                this.call("delete", project.id).then(resp => {
                     this.getProjects()
                 })
             }
