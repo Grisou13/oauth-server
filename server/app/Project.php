@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Auth\Authenticatable;
 use Laravel\Lumen\Auth\Authorizable;
@@ -35,5 +36,24 @@ class Project extends Model
     public function scopes(){
         return $this->hasMany(Scope::class);
     }
+    public function approvals(){
+        return $this->hasMany(Approval::class);
+    }
+    public function pendingApprovals(){
+        return $this->approvals()->where("approved","=",false);
+    }
+    /**
+     * Scope a query to only include active users.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function scopeActive($query){
+        if(Auth::check())
+            return $query->where("user_id","=", Auth::user()->id);
+        else
+            return $query;
+    }
+
 
 }

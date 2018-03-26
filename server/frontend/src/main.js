@@ -7,6 +7,10 @@ import PersonalAccessToken from './Dashboard/PersonalAccessTokens.vue'
 import Project from './Project/ProjectTable'
 import ProjectDetail from './Project/ProjectDetail'
 import ScopesTable from './Project/ScopeTable'
+
+import ApproveProject from './approval/ApproveProject'
+import PendingProject from './approval/PendingProject'
+
 import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
@@ -72,6 +76,8 @@ Vue.component("personal-access-token", PersonalAccessToken)
 // We'll talk about nested routes later.
 const routes = [
   { path: '/clients', component: Dashboard },
+  { path: '/approvals', component: ApproveProject },
+  { path: '/pendings', component: PendingProject },
   { path: '/projects', component: Project},
   { path: '/projects/:id', component: ProjectDetail}
 

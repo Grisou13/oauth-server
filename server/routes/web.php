@@ -31,7 +31,9 @@ $router->get("/login", function() {
 $router->get("/tutorial", function(){
    return view("tutorial");
 });
-
+function getCurrentUser(){
+    return \Illuminate\Support\Facades\Auth::user();
+}
 $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use ($router) {
     /**
      * Root of dashboard
@@ -48,6 +50,40 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
 
 
     $router->group(["prefix"=>"projects"], function() use($router){
+        /**
+         * Get the list of all apps the user can ask for access
+         */
+        $router->get("/apps", function(){
+            $projects = App\Project::doesntHave(\App\Approval::class);
+            return $projects->toJson();
+        });
+        $router->post("/apps/{project_id}/ask",function($project_id){
+            $project = \App\Project::findOrFail($project_id);
+            $approvalRequest = new \App\Approval();
+            $approvalRequest->approved = false;
+            $approvalRequest->user()->associate(getCurrentUser());
+            $approvalRequest->save();
+            return $approvalRequest->toJson();
+        });
+        $router->post("/apps/{project_id}/approve/{approval_id}",function($project_id, $approval_id){
+            $project = \App\Project::findOrFail($project_id);
+            if($project->user->id != getCurrentUser()->id)
+                return response("Not authorized, this isn't your project", 403);
+
+            $approvalRequest = \App\Approval::findOrFail($approval_id);
+            $approvalRequest->approved = true;
+            $approvalRequest->save();
+            $approvalRequest->delete();
+            return response();
+        });
+        /**
+         * Get the list of all apps to be approved by the user
+         */
+        $router->get("/apps/pending", function(){
+            $pending = \App\Project::has(\App\Approval::class)->mine()->get();
+            return $pending->toJson();
+        });
+
         /**
          * View all my projects
          */
