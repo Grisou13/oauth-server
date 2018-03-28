@@ -4,7 +4,7 @@ use Closure;
 class AddCorsHeaders
 {
     protected $headers =  [
-        "Access-Control-Allow-Origin"=>"http://localhost:8081",
+        "Access-Control-Allow-Origin"=>"http://localhost:8080",
         "Access-Control-Allow-Headers" => "X-Requested-With, Content-Type, X-Access-Token, x-access-token, Authorization, api_key, x-xsrf-token",
         // "Access-Control-Allow-Headers" => "True",
         "Access-Control-Request-Method"=>"GET, POST, PUT, PATCH, DELETE, OPTIONS",

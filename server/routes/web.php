@@ -54,7 +54,7 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
          * Get the list of all apps the user can ask for access
          */
         $router->get("/apps", function(){
-            $projects = App\Project::doesntHave(\App\Approval::class);
+            $projects = App\Project::doesntHave(\App\Approval::class)->notMine()->get();
             return $projects->toJson();
         });
         $router->post("/apps/{project_id}/ask",function($project_id){
@@ -65,6 +65,9 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
             $approvalRequest->save();
             return $approvalRequest->toJson();
         });
+        /**
+        * Approve the request
+        */
         $router->post("/apps/{project_id}/approve/{approval_id}",function($project_id, $approval_id){
             $project = \App\Project::findOrFail($project_id);
             if($project->user->id != getCurrentUser()->id)
@@ -73,14 +76,36 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
             $approvalRequest = \App\Approval::findOrFail($approval_id);
             $approvalRequest->approved = true;
             $approvalRequest->save();
-            $approvalRequest->delete();
+            // $approvalRequest->delete();
             return response();
+        });
+        $router->post("/apps/{project_id}/revoke/{approval_id}",function($project_id, $approval_id){
+            $project = \App\Project::findOrFail($project_id);
+            if($project->user->id != getCurrentUser()->id)
+                return response("Not authorized, this isn't your project", 403);
+
+            $approvalRequest = \App\Approval::findOrFail($approval_id);
+            $approvalRequest->approved = false;
+            $approvalRequest->save();
+            // $approvalRequest->delete();
+            return response();
+        });
+        /**
+         * Get the list of all apps that the user already approved
+         */
+        $router->get("/apps/approved", function(){
+            $pending = \App\Project::has(\App\Approval::class, function($query){
+              return $query->where("approved",true);
+            })->mine()->get();
+            return $pending->toJson();
         });
         /**
          * Get the list of all apps to be approved by the user
          */
         $router->get("/apps/pending", function(){
-            $pending = \App\Project::has(\App\Approval::class)->mine()->get();
+            $pending = \App\Project::has(\App\Approval::class, function($query){
+              return $query->where("approved",false);
+            })->mine()->get();
             return $pending->toJson();
         });
 
@@ -361,4 +386,3 @@ $router->group(["middleware"=>"auth:web"],function() use ($router){
         'uses' => 'ApproveAuthorizationController@approve',
     ]);
 });
-
