@@ -6,8 +6,9 @@
 
 <template>
     <div>
-        <div>
-                <h3>Personal Access Tokens<a class="btn-floating btn-large waves-effect waves-light red" @click="showCreateTokenForm"><i class="material-icons">add</i></a></h3>
+        <div class="card-panel" style="position: relative">
+            <h3>Personal Access Tokens</h3>
+            <a class="btn-floating btn-large waves-effect waves-light red" style="position:absolute;top:-20px;right:-20px;" @click="showCreateTokenForm"><i class="material-icons">add</i></a>
 
 
                 <!-- No Tokens Notice -->

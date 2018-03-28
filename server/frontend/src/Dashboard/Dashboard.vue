@@ -1,8 +1,15 @@
 <template>
-  <div id="app">
-    <Clients />
-    <PersonalAccessTokens />
-    <AuthorizedClients />
+  <div class="page">
+    <div class="">
+      <Clients />
+    </div>
+    <div class="">
+      <PersonalAccessTokens />
+    </div>
+    <div class="">
+      <AuthorizedClients />
+    </div>
+
   </div>
 </template>
 

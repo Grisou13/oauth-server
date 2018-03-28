@@ -3,6 +3,19 @@
 
 .fade-enter, .fade-leave-to
   opacity: 0
+.slide-left-enter, .slide-right-leave-active
+  opacity: 0
+  -webkit-transform: translate(30px, 0)
+  transform: translate(30px, 0)
+
+.slide-left-leave-active, .slide-right-enter
+  opacity: 0
+  -webkit-transform: translate(-30px, 0)
+  transform: translate(-30px, 0)
+
+.child-view
+  position: absolute
+  transition: all .5s cubic-bezier(.55,0,.1,1)
 
 #app
   font-family: 'Avenir', Helvetica, Arial, sans-serif
@@ -25,3 +38,6 @@ ul
 li
   display: inline-block
   margin: 0 10px
+
+.card-panel
+  margin-top: 40px

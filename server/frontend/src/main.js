@@ -73,12 +73,34 @@ function render () {
 // either be an actual component constructor created via
 // `Vue.extend()`, or just a component options object.
 // We'll talk about nested routes later.
+    const Parent = {
+        data () {
+            return {
+                transitionName: 'slide-left'
+            }
+        },
+        beforeRouteUpdate (to, from, next) {
+            const toDepth = to.path.split('/').length
+            const fromDepth = from.path.split('/').length
+            this.transitionName = toDepth < fromDepth ? 'slide-right' : 'slide-left'
+            next()
+        },
+        template: `
+            <div class="parent">
+              <transition :name="transitionName">
+                <router-view class="container  child-view"></router-view>
+              </transition>
+            </div>
+  `
+    }
     const routes = [
         { path: '/clients', component: Dashboard },
         { path: '/approvals', component: ApproveProject },
         { path: '/pendings', component: PendingProject },
-        { path: '/projects', component: Project},
-        { path: '/projects/:id', component: ProjectDetail},
+        { path: '/projects', component: Parent, children: [
+            { path: '', component: Project},
+            { path: '/:id', name: 'project-detail', component: ProjectDetail},
+        ]},
         { path: "/", component : Welcome}
         // { path: '/clients', component: Clients }
     ]

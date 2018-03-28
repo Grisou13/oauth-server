@@ -1,89 +1,92 @@
 <template>
-<div>
-    <h2>Mes api <a class="btn-floating btn-large waves-effect waves-light red" @click="showProjectCreateForm"><i class="material-icons">add</i></a></h2>
-
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>url</th>
-            <th>Description</th>
-            <th></th>
-            <th></th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody v-if="projects.length > 0">
+<div class="page">
+    <div class="card-panel" style="position:relative">
+        <h2 class="" style="padding: 8px">Mes api</h2>
+        <a class="btn-floating btn-large waves-effect waves-light red" style="position:absolute;top:-20px;right:-20px;" @click="showProjectCreateForm"><i class="material-icons">add</i></a>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>url</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody v-if="projects.length > 0">
             <tr  v-for="project in projects" class="clickable">
                 <td class="">{{ project.name }}</td>
                 <td class="">{{ project.url }}</td>
                 <td class="">{{ project.description }}</td>
-                <td><a href="#" class="btn show"  @click="openProject(project)"><i class="material-icons">remove_red_eye</i></a></td>
+                <td><router-link tag="a" class="btn show" :to="{name:'project-detail',params: {id: project.id}}"><i class="material-icons">remove_red_eye</i></router-link>
+
+                </td>
                 <td><a href="#" class="btn delete"><i class="material-icons" @click="destroy(project)">delete</i></a></td>
             </tr>
-        </tbody>
-    </table>
-    <!-- Create form -->
-    <div class="modal fade" id="modal-create-project" tabindex="-1" role="dialog">
-          <div class="modal-content">
-              <h4 class="modal-title">
-                  Create a new api
-              </h4>
-              <!-- Form Errors -->
-              <div class="alert alert-danger" v-if="createForm.errors.length > 0">
-                  <p class="mb-0"><strong>Whoops!</strong> Something went wrong!</p>
-                  <br>
-                  <ul>
-                      <li v-for="error in createForm.errors">
-                          {{ error }}
-                      </li>
-                  </ul>
-              </div>
+            </tbody>
+        </table>
+        <!-- Create form -->
+        <div class="modal fade" id="modal-create-project" tabindex="-1" role="dialog">
+            <div class="modal-content">
+                <h4 class="modal-title">
+                    Create a new api
+                </h4>
+                <!-- Form Errors -->
+                <div class="alert alert-danger" v-if="createForm.errors.length > 0">
+                    <p class="mb-0"><strong>Whoops!</strong> Something went wrong!</p>
+                    <br>
+                    <ul>
+                        <li v-for="error in createForm.errors">
+                            {{ error }}
+                        </li>
+                    </ul>
+                </div>
 
-              <!-- Create Project Form -->
-              <form role="form">
-                  <!-- Name -->
-                  <div class="form-group row">
-                      <label class="col-md-3 col-form-label">Name</label>
+                <!-- Create Project Form -->
+                <form role="form">
+                    <!-- Name -->
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Name</label>
 
-                      <div class="col-md-9">
-                          <input id="create-project-name" type="text" class="form-control"
-                                 @keyup.enter="create" v-model="createForm.name">
+                        <div class="col-md-9">
+                            <input id="create-project-name" type="text" class="form-control"
+                                   @keyup.enter="create" v-model="createForm.name">
 
-                          <span class="form-text text-muted">
+                            <span class="form-text text-muted">
                                   Name of the api.
                               </span>
-                      </div>
-                  </div>
+                        </div>
+                    </div>
 
-                  <!-- Url -->
-                  <div class="form-group row">
-                      <label class="col-md-3 col-form-label">Url</label>
+                    <!-- Url -->
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Url</label>
 
-                      <div class="col-md-9">
-                          <input  type="text" class="form-control"
-                                 @keyup.enter="create" v-model="createForm.url">
+                        <div class="col-md-9">
+                            <input  type="text" class="form-control"
+                                    @keyup.enter="create" v-model="createForm.url">
 
-                          <span class="form-text text-muted">
+                            <span class="form-text text-muted">
                                   Url of the api.
                               </span>
-                      </div>
-                  </div>
+                        </div>
+                    </div>
 
-                  <!-- Description -->
-                  <div class="form-group row">
-                      <label class="col-md-3 col-form-label">Description</label>
+                    <!-- Description -->
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Description</label>
 
-                      <div class="col-md-9">
-                          <input type="text" class="form-control" name="description"
-                                 @keyup.enter="create" v-model="createForm.description">
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" name="description"
+                                   @keyup.enter="create" v-model="createForm.description">
 
-                          <span class="form-text text-muted">
+                            <span class="form-text text-muted">
                                   Why, and for what will this api be used for.
                               </span>
-                      </div>
-                  </div>
-              </form>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal('#modal-create-project')">Close</button>
@@ -92,9 +95,11 @@
                     Save Changes
                 </button>
             </div>
-    </div>
+        </div>
 
+    </div>
 </div>
+
 </template>
 
 <script>

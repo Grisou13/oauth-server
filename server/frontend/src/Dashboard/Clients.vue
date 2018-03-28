@@ -5,8 +5,9 @@
 </style>
 
 <template>
-    <div>
-      <h3>OAuth Clients <a class="btn-floating btn-large waves-effect waves-light red" @click="showCreateClientForm"><i class="material-icons">add</i></a></h3>
+    <div class="card-panel" style="position:relative">
+        <h3>OAuth Clients</h3>
+        <a class="btn-floating btn-large waves-effect waves-light red" style="position:absolute;top:-20px;right:-20px;" @click="showCreateClientForm"><i class="material-icons">add</i></a>
       <!-- Current Clients -->
       <p class="mb-0" v-if="clients.length === 0">
           You have not created any OAuth clients.

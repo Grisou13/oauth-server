@@ -1,8 +1,11 @@
 <template>
-<div>
+<div class="page">
   <div v-if="this.project">
-    <button @click="goBack"><i class="material-icons">keyboard_arrow_left</i></button>
-    <a href="#" class="btn edit"  @click="showProjectEditForm(project)"><i class="material-icons" >edit</i></a>
+      <div class="row" >
+          <button  class="btn col s1 " @click="goBack"><i class="material-icons">keyboard_arrow_left</i></button>
+          <a href="#" class="btn edit col s1 offset-s10"  @click="showProjectEditForm(project)"><i class="material-icons" >edit</i></a>
+      </div>
+
 
     <div class="row">
       <div class="col s2">

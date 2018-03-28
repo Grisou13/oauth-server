@@ -17,9 +17,12 @@
     </div>
     <!-- route outlet -->
     <!-- component matched by the route will render here -->
-    <transition name="fade">
-      <router-view></router-view>
-    </transition>
+    <div class="app-main-view">
+      <transition name="fade" mode="out-in">
+        <router-view></router-view>
+      </transition>
+    </div>
+
   </div>
 
 

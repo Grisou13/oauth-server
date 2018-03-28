@@ -7,7 +7,7 @@
 <template>
     <div>
 
-        <div v-if="tokens.length > 0">
+        <div v-if="tokens.length > 0" class="card-panel" style="position: relative">
           <h3>Authorized Applications</h3>
           <!-- Authorized Tokens -->
           <table class="table table-borderless mb-0">
