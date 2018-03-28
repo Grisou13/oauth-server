@@ -65,7 +65,7 @@
                         <div class="row">
                           <div class="input-field col s12">
                             <input id="create-token-name" type="text" class="" name="name" v-model="form.name">
-                            <label for="name">Name</label>
+                            <label for="create-token-name">Name</label>
                           </div>
                         </div>
 
@@ -116,6 +116,7 @@
 
 <script>
     export default {
+        name: 'personal-access-tokens',
         /*
          * The component's data.
          */

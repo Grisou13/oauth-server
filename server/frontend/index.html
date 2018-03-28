@@ -3,20 +3,26 @@
   <head>
     <meta charset="utf-8">
     <title>frontend</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   </head>
   <body>
-    <div id="app">
-      <h1>Hello App!</h1>
-    <p>
-      <!-- use router-link component for navigation. -->
-      <!-- specify the link by passing the `to` prop. -->
-      <!-- `<router-link>` will be rendered as an `<a>` tag by default -->
-      <router-link to="/">Go to /</router-link>
-    </p>
+  <div id="app" class="container">
+    <div class="row">
+      <button type="button" class="btn col s12 m6"><router-link tag="span" to="/clients">Manage your api clients</router-link></button>
+      <button type="button" class="btn col s12 m6"><router-link tag="span" to="/projects">Manage your apis</router-link></button>
+    </div>
     <!-- route outlet -->
     <!-- component matched by the route will render here -->
-    <router-view></router-view>
-    </div>
-    <script src="/dist/build.js"></script>
+    <transition name="fade">
+      <router-view></router-view>
+    </transition>
+  </div>
+
+
+  <script src="/dist/build.js"></script>
   </body>
 </html>

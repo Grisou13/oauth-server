@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\Passport;
 use Laravel\Passport\Bridge\User;
 use Laravel\Passport\TokenRepository;
@@ -58,12 +60,30 @@ class AuthorizationController
     {
         return $this->withErrorHandling(function () use ($psrRequest, $request, $clients, $tokens) {
             try{
+
                 $authRequest = $this->server->validateAuthorizationRequest($psrRequest);
                 $scopes = $this->parseScopes($authRequest);
+                $client = $clients->find($authRequest->getClient()->getIdentifier());
+                //check if client has access to scopes
+                $projectNames = collect($scopes)->pluck('id')->map(function($scopeId){
+                    return explode(".",$scopeId)[0];
+                })->all();
+                //get all the project the users has pending approval
+                $projects = Project::whereIn("name",$projectNames)->whereHas("approvals",function($query){
+                    return $query->where("approved",true);
+                });
+                //remove scopes
+                $projects->get()->each(function($project){
+                    $scopes = $project->scopes;
+                });
+//                if($projects->count())
+//                    throw new OAuthServerException("The client {$client->id} isn't allowed to access the following scopes : []",401,"client-not-allowed-scope");
+                //actually give him a token
                 $token = $tokens->findValidToken(
                     $user = $request->user(),
-                    $client = $clients->find($authRequest->getClient()->getIdentifier())
+                    $client
                 );
+
                 if ($token && $token->scopes === collect($scopes)->pluck('id')->all()) {
                     return $this->approveRequest($authRequest, $user);
                 }
@@ -75,12 +95,13 @@ class AuthorizationController
                     'request' => $request,
                 ]);
             }catch(OAuthServerException $e){
-                //dd($e);
-                if($e->getErrorType() == "invalid_client" && $e->getHttpStatusCode() == 401){ //user needs to login
+                throw $e;
+//                dd($e);
+                /*if($e->getErrorType() == "invalid_client" && $e->getHttpStatusCode() == 401){ //user needs to login
                     return redirect()->to("/login?callback_url=".urlencode($request->fullUrl()));
                 }
                 else
-                    throw $e;
+                    throw $e;*/
             }
         });
     }
@@ -92,6 +113,7 @@ class AuthorizationController
      */
     protected function parseScopes($authRequest)
     {
+
         return Passport::scopesFor(
             collect($authRequest->getScopes())->map(function ($scope) {
                 return $scope->getIdentifier();

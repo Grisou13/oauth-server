@@ -34,8 +34,8 @@ class Scope extends Model
     public function project(){
         return $this->belongsTo(Project::class);
     }
-    public function getUrlAttribute(){
-        return $this->project->url.".".$this->name;
+    public function getNameAttribute(){
+        return $this->project->name.".".$this->attributes["name"];
     }
 
 }

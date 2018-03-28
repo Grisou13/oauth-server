@@ -24,8 +24,8 @@ $router->get('/', function () use ($router) {
 $router->get("/register", function() {
     return view("register");
 });
-$router->get("/login", function() {
-    return view("login");
+$router->get("/login", function(Request $request) {
+    return view("login", ["error"=>$request->get("error",false)]);
 });
 
 $router->get("/tutorial", function(){
@@ -258,7 +258,7 @@ function remoteLogin(){
 $router->post("/login", function(Request $request) {
 
   $callback_url = $request->query("callback_url",null);
-
+    $error = null;
   //TODO this should be handled by remote api
 
     //check if we have a user
@@ -267,23 +267,29 @@ $router->post("/login", function(Request $request) {
         if($request->ajax())
             return response("No user", 401);
         else
-            return redirect()->to("/login?error=user-not-found");
+            $error = "user-not-found";
     }
     //make sure password matches
     if(!app("hash")->check($request->input("password"),$user->password)){
         if($request->ajax())
             return response("invalid password", 401);
         else
-            return redirect()->to("/login?error=incorrect-password");
+            $error="incorrect-password";
     }
 
     $token = createToken($user);
-
+    if($error != null){
+        $query = http_build_query([
+            "callback_url"=>$callback_url,
+            "error"=>$error
+        ]);
+        return redirect()->to("/login?".$query);
+    }
     $query = http_build_query([
         "code"=>(string) $token,
         "credential"=>$user->credential,
         "callback_url"=>$callback_url
-        ]);
+    ]);
 
     return redirect()->to(url("/login/callback")."?".$query);
 });
@@ -312,7 +318,7 @@ $router->get("/login/callback",function(Request $request){
 
 
 
-    if($request->ajax())
+  if($request->ajax())
     return $access_token;
     //dd(url($callback_url));
 
@@ -347,9 +353,12 @@ redirect_uri=https://YOUR_APP/callback&
 
 // issue a token with information encoded information:
 //
-$router->get("/oauth/authorize", [
-  'uses' => 'AuthorizationController@authorize',
-]);
-$router->post('oauth/authorize', [
-  'uses' => 'ApproveAuthorizationController@approve',
-]);
+$router->group(["middleware"=>"auth:web"],function() use ($router){
+    $router->get("/oauth/authorize", [
+        'uses' => 'AuthorizationController@authorize',
+    ]);
+    $router->post('oauth/authorize', [
+        'uses' => 'ApproveAuthorizationController@approve',
+    ]);
+});
+

@@ -53,6 +53,7 @@ class CreateApiListTables extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('approvals');
         Schema::dropIfExists('scopes');
         Schema::dropIfExists('projects');
     }

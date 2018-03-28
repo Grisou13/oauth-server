@@ -6,13 +6,15 @@
             <form class="show-password log-in-form" method="post" action="/login?{{ \Illuminate\Support\Facades\Request::getQueryString() }}">
                 <div class="col s12">
                     <div class="input-field col s12">
-                        <input type="text" name="credential" id="username" placeholder="Username / Email">
+                        <label for="credential">Username / Email</label>
+                        <input type="text" name="credential" id="username" placeholder="Username / Email" class="{{ $error == "user-not-found" ? "invalid" : "" }}">
                         <label for="username">Username / Email </label>
                     </div>
                     <div class="input-field col s12">
 
                         <div class="password-wrapper">
-                            <input type="password" value="" placeholder="Enter Password" id="password" class="password">
+                            <label for="passowrd">Password</label>
+                            <input type="password" name="password" value="" placeholder="Enter Password" id="password" class="password {{ $error == "incorrect-password" ? "invalid" : "" }}">
                             <button class="unmask" type="button" title="Mask/Unmask password to check content">Unmask</button>
                         </div>
                         <label for="password">Password</label>

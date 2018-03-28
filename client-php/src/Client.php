@@ -4,17 +4,23 @@ namespace CPNVES\Auth\Client;
 
 class Client{
     protected $provider;
-    protected $domain = "http://localhost:8000";
+    
+    const domain = "http://localhost:8000";
+
     public function __construct($clientId, $clientSecret, $redirectUri){
         $this->provider = new \League\OAuth2\Client\Provider\GenericProvider([
             'clientId'                => $clientId,    // The client ID assigned to you by the provider
             'clientSecret'            => $clientSecret,    // The client password assigned to you by the provider
             'redirectUri'             => $redirectUri,
-            'urlAuthorize'            => $this->domain.'/oauth/authorize',
-            'urlAccessToken'          => $this->domain.'/oauth/token',
-            'urlResourceOwnerDetails' => $this->domain.'/api/profile'
+            'urlAuthorize'            => $this->getAuthorizationDomain().'/oauth/authorize',
+            'urlAccessToken'          => $this->getAuthorizationDomain().'/oauth/token',
+            'urlResourceOwnerDetails' => $this->getAuthorizationDomain().'/api/profile',
+            "scopeSeparator"          => " "
         ]);
         
+    }
+    public function getAuthorizationDomain(){
+        return constant("self::domain");
     }
     /**
      * Magically call the JWT instance.

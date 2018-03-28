@@ -1,8 +1,6 @@
 <template>
 <div>
-    <a class="action-link" tabindex="-1" @click="showProjectCreateForm">
-        Add new project
-    </a>
+    <h2>Mes api <a class="btn-floating btn-large waves-effect waves-light red" @click="showProjectCreateForm"><i class="material-icons">add</i></a></h2>
 
     <table class="table">
         <thead>
@@ -20,7 +18,6 @@
                 <td class="">{{ project.name }}</td>
                 <td class="">{{ project.url }}</td>
                 <td class="">{{ project.description }}</td>
-                <td><a href="#" class="btn edit"  @click="showProjectEditForm(project)"><i class="material-icons" >edit</i></a></td>
                 <td><a href="#" class="btn show"  @click="openProject(project)"><i class="material-icons">remove_red_eye</i></a></td>
                 <td><a href="#" class="btn delete"><i class="material-icons" @click="destroy(project)">delete</i></a></td>
             </tr>
@@ -30,7 +27,7 @@
     <div class="modal fade" id="modal-create-project" tabindex="-1" role="dialog">
           <div class="modal-content">
               <h4 class="modal-title">
-                  Create project
+                  Create a new api
               </h4>
               <!-- Form Errors -->
               <div class="alert alert-danger" v-if="createForm.errors.length > 0">
@@ -43,7 +40,7 @@
                   </ul>
               </div>
 
-              <!-- Edit Project Form -->
+              <!-- Create Project Form -->
               <form role="form">
                   <!-- Name -->
                   <div class="form-group row">
@@ -96,78 +93,8 @@
                 </button>
             </div>
     </div>
-    <!-- Edit form -->
-    <div class="modal fade" id="modal-edit-project" tabindex="-1" role="dialog">
-            <div class="modal-content">
-                    <h4 class="modal-title">
-                        Edit project
-                    </h4>
-                    <!-- Form Errors -->
-                    <div class="alert alert-danger" v-if="editForm.errors.length > 0">
-                        <p class="mb-0"><strong>Whoops!</strong> Something went wrong!</p>
-                        <br>
-                        <ul>
-                            <li v-for="error in editForm.errors">
-                                {{ error }}
-                            </li>
-                        </ul>
-                    </div>
 
-                    <!-- Edit Project Form -->
-                    <form role="form">
-                        <!-- Name -->
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label">Name</label>
-
-                            <div class="col-md-9">
-                                <input id="edit-project-name" type="text" class="form-control"
-                                       @keyup.enter="update" v-model="editForm.name">
-
-                                <span class="form-text text-muted">
-                                        Name of the api.
-                                    </span>
-                            </div>
-                        </div>
-                        <!-- Url -->
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label">Url</label>
-
-                            <div class="col-md-9">
-                                <input type="text" class="form-control"
-                                       @keyup.enter="update" v-model="editForm.url">
-
-                                <span class="form-text text-muted">
-                                        Url of the api.
-                                    </span>
-                            </div>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label">Description</label>
-
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="description"
-                                       @keyup.enter="update" v-model="editForm.description">
-
-                                <span class="form-text text-muted">
-                                        Why, and for what will this api be used for.
-                                    </span>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <!-- Modal Actions -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal('#modal-edit-project')">Close</button>
-
-                    <button type="button" class="btn btn-primary" @click="update">
-                        Save Changes
-                    </button>
-                </div>
-
-        </div>
-      </div>
+</div>
 </template>
 
 <script>
@@ -185,13 +112,7 @@
             return {
                 projects: [],
                 //project: window.project || this.project,
-                editForm: {
-                    errors: [],
-                    id: '',
-                    name:'',
-                    url: '',
-                    description: ''
-                },
+
                 createForm: {
                     errors: [],
                     name:'',
@@ -224,11 +145,7 @@
                       $('#create-project-name').focus();
                     }
                 })
-                M.Modal.init($("#modal-edit-project"),{
-                    onOpenEnd: function(){
-                      $('#edit-project-name').focus();
-                    }
-                })
+
 
             },
             call(method, url = '', form = {}, modal = null){
@@ -257,23 +174,13 @@
             getProjects(){
                 return axios.get("/dashboard/projects").then(resp => this.projects = resp.data)
             },
-            update(){
-                this.call("patch",this.editForm.id, this.editForm, "#modal-edit-project").then(resp => {
-                    this.getProjects()
-                })
-            },
+
             create(){
                 this.call("post",'', this.createForm,"#modal-create-project").then(resp => {
-                    this.projects.push(resp.data)
+                    this.projects.push(resp)
                 })
             },
-            showProjectEditForm(project) {
-                this.editForm.id = project.id;
-                this.editForm.name = project.name;
-                this.editForm.description = project.description;
 
-                M.Modal.getInstance($('#modal-edit-project')).open();
-            },
             showProjectCreateForm(){
                 M.Modal.getInstance($('#modal-create-project')).open();
             },

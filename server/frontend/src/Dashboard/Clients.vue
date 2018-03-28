@@ -177,10 +177,8 @@
 
 <script>
     export default {
-        modals: {
-          edit: null,
-          create: null
-        },
+        name: 'clients',
+
         /*
          * The component's data.
          */

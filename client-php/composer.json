@@ -2,7 +2,8 @@
     "name": "thomas.ricci/cpnv-oauth2-client",
     "description": "oauth2 client for cpnv-es.ch",
     "require": {
-        "league/oauth2-client": "^2.3"
+        "league/oauth2-client": "^2.3",
+        "vlucas/phpdotenv": "^2.4"
     },
     "authors": [
         {
