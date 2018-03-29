@@ -76,6 +76,17 @@ class AuthorizationController
                 $projects->get()->each(function($project){
                     $scopes = $project->scopes;
                 });
+                // input scopes
+                // [
+                // [ "scope.name" => "Scope description"]
+                //]
+
+                // from db
+                // [
+                // [ "scope.name" => "Scope description"],
+                // [ "scope.name" => "Scope description"]
+                //]
+
 //                if($projects->count())
 //                    throw new OAuthServerException("The client {$client->id} isn't allowed to access the following scopes : []",401,"client-not-allowed-scope");
                 //actually give him a token
