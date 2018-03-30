@@ -5,7 +5,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 try {
     (new Dotenv\Dotenv(__DIR__.'/../'))->overload();
 } catch (Dotenv\Exception\InvalidPathException $e) {
-    
+
 }
 
 /*
@@ -98,6 +98,7 @@ $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 $app->register(Appzcoder\LumenRoutesList\RoutesCommandServiceProvider::class);
+$app->register(Laravel\Tinker\TinkerServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes

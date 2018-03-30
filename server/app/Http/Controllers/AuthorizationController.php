@@ -64,18 +64,26 @@ class AuthorizationController
                 $authRequest = $this->server->validateAuthorizationRequest($psrRequest);
                 $scopes = $this->parseScopes($authRequest);
                 $client = $clients->find($authRequest->getClient()->getIdentifier());
+                $user = $request->user();
                 //check if client has access to scopes
                 $projectNames = collect($scopes)->pluck('id')->map(function($scopeId){
                     return explode(".",$scopeId)[0];
                 })->all();
                 //get all the project the users has pending approval
-                $projects = Project::whereIn("name",$projectNames)->whereHas("approvals",function($query){
-                    return $query->where("approved",true);
-                });
-                //remove scopes
-                $projects->get()->each(function($project){
-                    $scopes = $project->scopes;
-                });
+                // $projects = Project::whereIn("name",$projectNames)->whereHas("approvals",function($query){
+                //     return $query->where("approved",true);
+                // });
+                // //remove scopes
+                // $projects->get()->each(function($project){
+                //     $scopes = $project->scopes;
+                // });
+                // all the scopes the user has access to
+                Scope::whereHas("project",function($query){
+                  return $query->whereIn("name", $projectNames)->whereHas("approvals",function($query){
+                      return $query->where("approved",true)->where("user_id",$client->user_id);
+                  });
+                }); //->whereIn("name",collect($scopes)->pluck('id')->all())
+
                 // input scopes
                 // [
                 // [ "scope.name" => "Scope description"]
@@ -91,7 +99,7 @@ class AuthorizationController
 //                    throw new OAuthServerException("The client {$client->id} isn't allowed to access the following scopes : []",401,"client-not-allowed-scope");
                 //actually give him a token
                 $token = $tokens->findValidToken(
-                    $user = $request->user(),
+                    $user,
                     $client
                 );
 
