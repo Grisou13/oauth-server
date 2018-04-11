@@ -41,3 +41,22 @@ li
 
 .card-panel
   margin-top: 40px
+
+header, main, footer
+  padding-left: 150px
+.sidenav-trigger
+  display: none
+
+@media only screen and (max-width : 992px)
+  .sidenav-trigger
+    position: fixed
+    top: 10px
+    left: 10px
+    display: block
+  header, main, footer
+    padding-left: 0
+
+.sidenav li
+  width: 100% !important
+  & a
+    width: 100%

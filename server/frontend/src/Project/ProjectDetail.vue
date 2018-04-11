@@ -1,9 +1,9 @@
 <template>
 <div class="page">
-  <div v-if="this.project">
+  <div class="card-panel">
       <div class="row" >
-          <button  class="btn col s1 " @click="goBack"><i class="material-icons">keyboard_arrow_left</i></button>
-          <a href="#" class="btn edit col s1 offset-s10"  @click="showProjectEditForm(project)"><i class="material-icons" >edit</i></a>
+          <!--<button  class="btn col s1 " @click="goBack"><i class="material-icons">keyboard_arrow_left</i></button>-->
+          <a href="#" class="btn edit col s2 offset-s10"  @click="showProjectEditForm(project)"><i class="material-icons" >edit</i></a>
       </div>
 
 
@@ -31,14 +31,19 @@
         <p>{{this.project.url}}</p>
       </div>
     </div>
-    <div class="row">
-      <scopes-table project="this.project.id"></scopes-table>
+    <div class="row col s12">
+      <scopes-table />
     </div>
+    <div class="row">
+      <div class="col m6 s12">
+        <approved-project-list />
+      </div>
+      <div class="col m6 s12">
+        <pending-project-list />
+      </div>
+    </div>
+  </div>
 
-  </div>
-  <div v-else>
-    <h3>Loading project info...</h3>
-  </div>
   <!-- Edit form -->
   <div class="modal fade" id="modal-edit-project" tabindex="-1" role="dialog">
     <div class="modal-content">
@@ -111,9 +116,15 @@
 </template>
 <script>
   import ScopesTable from "./ScopeTable";
+  import PendingProjectList from "../approval/PendingProjectList";
+  import ApprovedProjectList from "../approval/ApprovedProjectList";
 
   export default {
-    components: {ScopesTable},
+    components: {
+        ApprovedProjectList,
+        PendingProjectList,
+        ScopesTable
+    },
     methods: {
       closeModal(node){
           M.Modal.getInstance($(node)).close()
@@ -133,12 +144,17 @@
           : this.$router.push('/')*/
       },
       prepareComponent(){
+          M.Modal.init($("#modal-edit-project"),{
+              onOpenEnd: function(){
+                  $('#edit-project-name').focus();
+              }
+          })
+          debugger;
         this.get()
-        M.Modal.init($("#modal-edit-project"),{
-            onOpenEnd: function(){
-                $('#edit-project-name').focus();
-            }
-        })
+          // let elem = document.querySelector('.collapsible');
+          // let instance = M.Collapsible.init(elem, {});
+          // console.log("TAMER",instance)
+
       },
       update(){
           return axios["put"](`/dashboard/projects/${this.project.id}`, this.editForm).then(resp => {

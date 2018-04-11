@@ -19,6 +19,11 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register()
     {
+      try{
+        $scopes = Scope::all()->pluck("description","name")->all();
+
+        Passport::tokensCan($scopes);
+      }catch(\Exception $e){}
 
     }
 
@@ -29,9 +34,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $scopes = Scope::all()->pluck("description","name")->all();
 
-        Passport::tokensCan($scopes);
 
         $this->app['auth']->extend('token', function($app, $name, array $config) {
             // Return an instance of Illuminate\Contracts\Auth\Guard...

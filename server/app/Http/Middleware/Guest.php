@@ -1,11 +1,17 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: Thomas
+ * Date: 10.04.2018
+ * Time: 11:58
+ */
 
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
-class Authenticate
+class Guest
 {
     /**
      * The authentication guard factory instance.
@@ -36,11 +42,8 @@ class Authenticate
     public function handle($request, Closure $next, $guard = null)
     {
 
-        if ($this->auth->guard($guard)->guest()) {
-            if($request->ajax())
-                return response('Unauthorized.', 401);
-            else
-                return redirect()->to("/login");
+        if ($this->auth->guard($guard)->check()) {
+            return redirect()->to("/dashboard");
         }
 
         return $next($request);

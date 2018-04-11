@@ -8,7 +8,6 @@
                     <div class="input-field col s12">
                         <label for="credential">Username / Email</label>
                         <input type="text" name="credential" id="username" placeholder="Username / Email" class="{{ $error == "user-not-found" ? "invalid" : "" }}">
-                        <label for="username">Username / Email </label>
                     </div>
                     <div class="input-field col s12">
 

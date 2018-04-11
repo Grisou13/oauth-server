@@ -19,6 +19,9 @@ class Scope extends Model
     protected $fillable = [
         'name','description',
     ];
+    public $appends = [
+      "scope"
+    ];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -34,8 +37,14 @@ class Scope extends Model
     public function project(){
         return $this->belongsTo(Project::class);
     }
-    public function getNameAttribute(){
-        return $this->project->name.".".$this->attributes["name"];
+    public function getScopeAttribute(){
+      $exploded = explode(".",$this->attributes["name"]);
+      array_shift($exploded);
+      return implode(".",$exploded);
+
+    }
+    public function setNameAttribute($value){
+      return $this->attributes["name"] = $this->project->name.".".trim($value);
     }
 
 }

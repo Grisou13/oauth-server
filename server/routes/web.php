@@ -13,100 +13,143 @@
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use \Illuminate\Http\Request;
-
+use \Illuminate\Support\Facades\Auth;
 /**
  * @var $router Illuminate\Routing\Router
  */
 
 $router->get('/', function () use ($router) {
     return view("home");
+})->middleware("guest");
+$router->get('/logout', function () use ($router) {
+    Auth::logout();
+    return redirect()->to("/");
 });
 $router->get("/register", function() {
     return view("register");
-});
+})->middleware("guest");
+
 $router->get("/login", function(Request $request) {
     return view("login", ["error"=>$request->get("error",false)]);
-});
+})->middleware("guest");
 
 $router->get("/tutorial", function(){
    return view("tutorial");
 });
+
 function getCurrentUser(){
-    return \Illuminate\Support\Facades\Auth::user();
+    return Auth::user();
 }
-$router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use ($router) {
+$router->group(['middleware' => 'auth:web', "prefix"=>"dashboard"], function () use ($router) {
     /**
      * Root of dashboard
      */
     $router->get("/",function(Request $request){
         return view("dashboard",["authToken"=>$request->user()->token]);
     });
-    /**
-     * Handle oauth clients
-     */
-    $router->get("/clients", function(){
-        return view("clients");
-    });
-
 
     $router->group(["prefix"=>"projects"], function() use($router){
         /**
          * Get the list of all apps the user can ask for access
          */
         $router->get("/apps", function(){
-            $projects = App\Project::doesntHave(\App\Approval::class)->notMine()->get();
+            $projects = App\Project::doesntHave('approvals')->notMine()->get();
             return $projects->toJson();
         });
+        /**
+         * Allows a user to ask for a project
+         */
         $router->post("/apps/{project_id}/ask",function($project_id){
             $project = \App\Project::findOrFail($project_id);
-            $approvalRequest = new \App\Approval();
+            //check if approval already exists
+            $approvalRequest = \App\Approval::where([
+              "user_id"=>getCurrentUser()->id,
+              "project_id" => $project->id
+            ])->firstOrNew([
+                "user_id"=>getCurrentUser()->id,
+                "project_id" => $project->id
+            ]);
+
+            //$approvalRequest = new \App\Approval();
+            if(!$approvalRequest->exists){
+              $approvalRequest->user()->associate(getCurrentUser());
+            }
             $approvalRequest->approved = false;
-            $approvalRequest->user()->associate(getCurrentUser());
             $approvalRequest->save();
             return $approvalRequest->toJson();
         });
         /**
+         * Allows a user to delete a request he has for a project
+         */
+        $router->delete("/apps/{project_id}/delete",function($project_id){
+            $project = \App\Project::findOrFail($project_id);
+            $approvalRequest = \App\Approval::whereHas("project", function($query) use ($project){
+              $query->where("projects.id",$project->id);
+            })->where("user_id","=",getCurrentUser()->id)->firstOrFail();
+
+            $approvalRequest->delete();
+            return response('',200);
+        });
+        /**
         * Approve the request
         */
-        $router->post("/apps/{project_id}/approve/{approval_id}",function($project_id, $approval_id){
+        $router->post("/apps/{project_id}/approve/{user_id}",function($project_id, $user_id){
             $project = \App\Project::findOrFail($project_id);
             if($project->user->id != getCurrentUser()->id)
                 return response("Not authorized, this isn't your project", 403);
 
-            $approvalRequest = \App\Approval::findOrFail($approval_id);
-            $approvalRequest->approved = true;
-            $approvalRequest->save();
-            // $approvalRequest->delete();
-            return response();
+            $approvalRequest = \App\Approval::where("project_id",$project_id)
+                ->where("user_id",$user_id)
+                ->firstOrFail();
+            $approvalRequest->update(["approved"=>true]);
+            return response("");
         });
-        $router->post("/apps/{project_id}/revoke/{approval_id}",function($project_id, $approval_id){
+        $router->post("/apps/{project_id}/revoke/{user_id}",function($project_id, $user_id){
             $project = \App\Project::findOrFail($project_id);
             if($project->user->id != getCurrentUser()->id)
                 return response("Not authorized, this isn't your project", 403);
 
-            $approvalRequest = \App\Approval::findOrFail($approval_id);
-            $approvalRequest->approved = false;
-            $approvalRequest->save();
-            // $approvalRequest->delete();
-            return response();
+            $approvalRequest = \App\Approval::where("project_id",$project_id)
+                ->where("user_id",$user_id)
+                ->firstOrFail();
+            $approvalRequest->update(["approved"=>false]);
+            return response("");
         });
         /**
          * Get the list of all apps that the user already approved
          */
-        $router->get("/apps/approved", function(){
-            $pending = \App\Project::has(\App\Approval::class, function($query){
-              return $query->where("approved",true);
-            })->mine()->get();
+        $router->get("/approved", function(){
+            $pending = \App\Approval::with(["project","user"])->where("approved",true)->whereHas("project", function($query){
+                $query->where("user_id", getCurrentUser()->id);
+            })->get();
             return $pending->toJson();
+        });
+        $router->get("/approved/{project_id}", function($project_id){
+            $mine = \App\Approval::with(["project","user"])
+                ->where("approved",true)
+                ->whereHas("project", function($query) use($project_id) {
+                    $query->where("user_id", getCurrentUser()->id);
+                    $query->where("id", $project_id);
+                })->get();
+            return $mine->toJson();
         });
         /**
          * Get the list of all apps to be approved by the user
          */
-        $router->get("/apps/pending", function(){
-            $pending = \App\Project::has(\App\Approval::class, function($query){
-              return $query->where("approved",false);
-            })->mine()->get();
-            return $pending->toJson();
+        $router->get("/pending", function(){
+            $mine = \App\Approval::with(["project","user"])
+                ->where("approved",false)
+                ->whereHas("project", function($query){
+                    $query->where("user_id", getCurrentUser()->id);
+                })->get();
+            return $mine->toJson();
+        });
+        $router->get("/pending/{project_id}", function($project_id){
+            $mine = \App\Approval::with(["project","user"])->where("approved",false)->whereHas("project", function($query) use($project_id) {
+                $query->where("user_id", getCurrentUser()->id);
+                $query->where("id", $project_id);
+            })->get();
+            return $mine->toJson();
         });
 
         /**
@@ -219,8 +262,9 @@ $router->group(['middleware' => 'auth', "prefix"=>"dashboard"], function () use 
 
                 //create the project
                 $scope = new \App\Scope();
-                $scope->fill($request->except("scopes"));
                 $scope->project()->associate($project);
+                $scope->fill($request->except("scopes"));
+
                 //save everything
                 $scope->saveOrFail();
 
@@ -248,11 +292,13 @@ function createToken($user){
         ->sign($signer, config("app.key")) // creates a signature using "testing" as key
         ->getToken(); // Retrieves the generated token
 }
+
 $router->get("/logout",function(Request $request){
     $callback_url = $request->get("callback_url",url("/login"));
     setcookie("token", "", time()-3600);
     return redirect()->to($callback_url);
 });
+
 $router->post("/register", function(Request $request) {
     $callback_url = $request->get("callback_url",url("/dashboard"));
 

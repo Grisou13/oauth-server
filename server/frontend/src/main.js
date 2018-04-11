@@ -1,19 +1,21 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Dashboard from './Dashboard/Dashboard.vue'
-import Clients from './Dashboard/Clients.vue'
-import AuthorizedClients from './Dashboard/AuthorizedClients.vue'
-import PersonalAccessToken from './Dashboard/PersonalAccessTokens.vue'
+import Dashboard from './Oauth/Dashboard.vue'
+import Clients from './Oauth/Clients.vue'
+import AuthorizedClients from './Oauth/AuthorizedClients.vue'
+import PersonalAccessToken from './Oauth/PersonalAccessTokens.vue'
 
 import Project from './Project/ProjectTable'
 import ProjectDetail from './Project/ProjectDetail'
 import ScopesTable from './Project/ScopeTable'
 
-import ApproveProject from './approval/ApproveProject'
-import PendingProject from './approval/PendingProject'
+import ApprovedProject from './approval/ApprovedProjectList'
+import AskableProjectList from './approval/AskableProjectList'
+import PendingProjectList from './approval/PendingProjectList'
 import Welcome from './Welcome.vue'
-
-
+import DashboardWelcome from './DashboardWelcome.vue'
+import Main from './Main'
+import Auth from './auth'
 import "./app.sass"
 
 //==============
@@ -40,8 +42,9 @@ try {
 } catch (e) {}
 
 
-function render () {
 
+
+function render () {
 
     /**
      * Next we will register the CSRF Token as a common header with Axios so that
@@ -64,61 +67,62 @@ function render () {
     } else {
         console.error('Auth token not found');
     }
-    console.log($.fn.modal)
+
 //==============
 // Routes definition
 //==============
-// 2. Define some routes
-// Each route should map to a component. The "component" can
-// either be an actual component constructor created via
-// `Vue.extend()`, or just a component options object.
-// We'll talk about nested routes later.
-    const Parent = {
-        data () {
-            return {
-                transitionName: 'slide-left'
-            }
-        },
-        beforeRouteUpdate (to, from, next) {
-            const toDepth = to.path.split('/').length
-            const fromDepth = from.path.split('/').length
-            this.transitionName = toDepth < fromDepth ? 'slide-right' : 'slide-left'
-            next()
-        },
-        template: `
-            <div class="parent">
-              <transition :name="transitionName">
-                <router-view class="container  child-view"></router-view>
-              </transition>
-            </div>
-  `
-    }
-    const routes = [
-        { path: '/clients', component: Dashboard },
-        { path: '/approvals', component: ApproveProject },
-        { path: '/pendings', component: PendingProject },
-        { path: '/projects', component: Parent, children: [
-            { path: '', component: Project},
-            { path: '/:id', name: 'project-detail', component: ProjectDetail},
-        ]},
-        { path: "/", component : Welcome}
-        // { path: '/clients', component: Clients }
-    ]
 
-// 3. Create the router instance and pass the `routes` option
-// You can pass in additional options here, but let's
-// keep it simple for now.
+    const routes = [
+        {path: '/', meta:{ guest:true}, component: Welcome},
+        {path: '/login', meta:{ guest:true}, name:'login'},
+        {path: '/register', meta:{ guest:true}, name:'register'},
+        {path: '/tutorial', name:'tutorial'},
+        {path: '/dashboard', meta:{ auth:true}, template: `<router-view></router-view>`, children:[
+            { path: '', name:"dashboard",          component : DashboardWelcome},
+            { path: '/clients', name:'clients',   component: Dashboard },
+            { path: '/approved', name:'approved', component: ApprovedProject },
+            { path: '/ask',  name:'ask',     component: AskableProjectList},
+            { path: '/pending', name:'pending', component: PendingProjectList },
+            { path: '/projects', name: 'project-list',  component: Project },
+            { path: '/projects/:id', name: 'project-detail',  component: ProjectDetail },
+        ]},
+    ]
+//==============
+// Router configuration
+//==============
     const router = new VueRouter({
-        routes // short for `routes: routes`
+        routes
     })
+
+    router.beforeEach((to, from, next) => {
+        /*if (to.matched.some(record => record.meta.requiresAuth) && !Auth.loggedIn) {
+            next({ path: '/login', query: { redirect: to.fullPath }});
+        } else {
+            next();
+        }*/
+
+        // check if the user needs to be authenticated. If the yes, redirect to the
+        // login page if the token is null
+        if (to.matched.some(record => record.meta.auth) && !Auth.loggedIn) {
+            return redirect({ name: 'login' , query: { redirect: to.fullPath }})
+        }
+
+        // check if a logged user should see this page
+        if (to.matched.some(record => record.meta.guest) && Auth.loggedIn) {
+            return redirect({ name: 'dashboard' , query: { redirect: to.fullPath }})
+        }
+        return next()
+    });
 
 // 4. Create and mount the root instance.
 // Make sure to inject the router with the router option to make the
 // whole app router-aware.
 
     const app = new Vue({
-        router
-    }).$mount('#app')
+      router,
+      template: '<Main/>',
+      components: { Main }
+    }).$mount('#mount')
 
 }
 
@@ -164,5 +168,3 @@ else{
     })
 
 }
-
-

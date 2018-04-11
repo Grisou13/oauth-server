@@ -1,10 +1,9 @@
 <template>
-<div>
-    <a class="action-link" tabindex="-1" @click="showScopeCreateForm">
-        Add new scope
-    </a>
+<div style="position:relative">
+    <h2 class="" style="padding: 8px">Scopes</h2>
+    <a class="btn-floating btn-large waves-effect waves-light red" style="position:absolute;top:-20px;right:-20px;" @click="showScopeCreateForm"><i class="material-icons">add</i></a>
 
-    <table class="table">
+    <table class="table responsive-table">
         <thead>
         <tr>
             <th>Name</th>
@@ -217,7 +216,7 @@
                   form.errors = []
                   if(modal)
                     M.Modal.getInstance($(modal)).close()
-                  return resp.data
+                  return resp
 
               }).catch(error => {
                 console.error(error)

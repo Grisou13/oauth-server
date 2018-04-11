@@ -78,12 +78,23 @@ class AuthorizationController
                 //     $scopes = $project->scopes;
                 // });
                 // all the scopes the user has access to
-                Scope::whereHas("project",function($query){
+                $scopesAccessible = Scope::whereHas("project",function($query){
                   return $query->whereIn("name", $projectNames)->whereHas("approvals",function($query){
                       return $query->where("approved",true)->where("user_id",$client->user_id);
                   });
-                }); //->whereIn("name",collect($scopes)->pluck('id')->all())
+                })->get("name"); //->whereIn("name",collect($scopes)->pluck('id')->all())
 
+                // all the scopes the user has created
+                $myScopes = Scope::whereHas("project",function($query){
+                  return $query->where("user_id",$client->user_id);
+                })->get("name");
+
+                $scopesAccessible = $scopesAccessible->merge($myScopes);
+
+                $scopes = collect($scopes)->filter(function($s){
+                  return $scopesAccessible->contains($s["id"]);
+                });
+                //dd($scopes,$scopesAccessible);
                 // input scopes
                 // [
                 // [ "scope.name" => "Scope description"]

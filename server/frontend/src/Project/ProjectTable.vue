@@ -3,7 +3,7 @@
     <div class="card-panel" style="position:relative">
         <h2 class="" style="padding: 8px">Mes api</h2>
         <a class="btn-floating btn-large waves-effect waves-light red" style="position:absolute;top:-20px;right:-20px;" @click="showProjectCreateForm"><i class="material-icons">add</i></a>
-        <table class="table">
+        <table class="table responsive-table">
             <thead>
             <tr>
                 <th>Name</th>
@@ -103,10 +103,7 @@
 </template>
 
 <script>
-    import ScopesTable from "./ScopeTable";
-
     export default {
-        components: {ScopesTable},
         name: 'projects-table',
         props: ["project"],
         modals: {

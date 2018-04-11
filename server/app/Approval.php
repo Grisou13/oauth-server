@@ -12,7 +12,9 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
 class Approval extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Mine;
+
+    public $timestamps = false;
     protected $attributes = [
         "approved" => false
     ];
@@ -25,7 +27,7 @@ class Approval extends Model
      * @var array
      */
     protected $fillable = [
-        'approved'
+        'approved', "user_id","project_id"
     ];
 
     /**
@@ -52,5 +54,7 @@ class Approval extends Model
     public function project(){
         return $this->belongsTo(Project::class);
     }
+
+
 
 }
