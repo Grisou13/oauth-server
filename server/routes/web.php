@@ -19,19 +19,20 @@ use \Illuminate\Support\Facades\Auth;
  */
 
 $router->get('/', function () use ($router) {
+    return view("test");
     return view("home");
-})->middleware("guest");
+});
 $router->get('/logout', function () use ($router) {
     Auth::logout();
     return redirect()->to("/");
 });
 $router->get("/register", function() {
     return view("register");
-})->middleware("guest");
+});
 
 $router->get("/login", function(Request $request) {
     return view("login", ["error"=>$request->get("error",false)]);
-})->middleware("guest");
+});
 
 $router->get("/tutorial", function(){
    return view("tutorial");
@@ -364,7 +365,11 @@ $router->post("/login", function(Request $request) {
 
     return redirect()->to(url("/login/callback")."?".$query);
 });
-
+$router->get("/me",["middleware"=>"auth:",function(Request $request){
+    //todo request the profile of the user based on token to the actual profile api
+    //we should get the token of the user
+    return \Auth::user();
+}]);
 // TODO define a scope for this route
 $router->get("/api/profile",["middleware"=>"auth:api",function(Request $request){
     //todo request the profile of the user based on token to the actual profile api

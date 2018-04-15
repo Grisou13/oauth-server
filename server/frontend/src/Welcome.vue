@@ -6,6 +6,5 @@
         <p>View the list of clients that want access to your api</p>
         <p>Revoke access to clients of your api</p>
         <p>Revoke the right for them to ask for your api</p>
-
     </div>
 </template>

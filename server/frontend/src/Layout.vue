@@ -9,10 +9,14 @@
                 <li class="divider"></li>
                 <li><a href="/tutorial#create-your-app">Creating your own third party app</a></li>
             </ul>
-            <li class="bold"><a href="/logout">Logout</a></li>
-            <li class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{name: 'clients'}">Manage your api clients</router-link></li>
-            <li class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{ name:'ask'}">Available apis</router-link></li>
-            <li class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{ name: 'project-list' }">Manage your apis</router-link></li>
+            <li v-if="!loggedIn"class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{name: 'login'}">Login</router-link></li>
+            <li v-if="!loggedIn"class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{name: 'register'}">Register</router-link></li>
+
+            <li v-if="loggedIn"class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{name: 'logout'}">Logout</router-link></li>
+
+            <li v-if="loggedIn"class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{name: 'clients'}">Manage your api clients</router-link></li>
+            <li v-if="loggedIn"class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{ name:'ask'}">Available apis</router-link></li>
+            <li v-if="loggedIn"class="bold"><router-link class="waves-effect waves-teal" tag="a" :to="{ name: 'project-list' }">Manage your apis</router-link></li>
         </ul>
 
         <!--<a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>-->
@@ -29,11 +33,13 @@
     </div>
 </template>
 <script>
+    import EventBus from './EventBus'
     export default {
         data () {
             return {
                 transitionName: 'fade',
                 depth: 1,
+                loggedIn: false
             }
         },
         ready() {
@@ -51,6 +57,12 @@
                 var elem = document.querySelector('.sidenav');
                 var instance = M.Sidenav.init(elem, {});
                 instance.open()
+                EventBus.$on("logged-in", () => {
+                    this.loggedIn = true
+                })
+                EventBus.$on("log-out", () => {
+                    this.loggedIn = false
+                })
             }
         },
         beforeRouteUpdate (to, from, next) {
