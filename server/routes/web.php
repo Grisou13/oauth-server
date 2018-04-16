@@ -46,7 +46,7 @@ $router->group(['middleware' => 'auth:web', "prefix"=>"dashboard"], function () 
      * Root of dashboard
      */
     $router->get("/",function(Request $request){
-        return view("dashboard",["authToken"=>$request->user()->token]);
+        return view("test",["authToken"=>$request->user()->token]);
     });
 
     $router->group(["prefix"=>"projects"], function() use($router){
@@ -294,6 +294,96 @@ function createToken($user){
         ->getToken(); // Retrieves the generated token
 }
 
+function loginRedirect($token, $callback_url, $username){
+  $query = http_build_query([
+      "code"=>(string) $token,
+      "credential"=>$credentials[0],
+      "callback_url"=>$callback_url
+  ]);
+
+  return redirect()->to(url("/login/callback")."?".$query);
+}
+function localLogin($credentials){
+  $callback_url = \Illuminate\Support\Facades\Request::query("callback_url",url("/dashboard"));
+
+  //check if we have a user
+  $user = App\User::where("credential",$credentials[0])->first();
+  if(!$user){
+      if($request->ajax())
+          return response("No user", 401);
+      else
+          $error = "user-not-found";
+  }
+  //make sure password matches
+  if(!app("hash")->check($credentials[1],$user->password)){
+      if($request->ajax())
+          return response("invalid password", 401);
+      else
+          $error="incorrect-password";
+  }
+
+  $token = createToken($user);
+  $user->token = $token;
+  $user->save()
+  
+  if($error != null){
+      $query = http_build_query([
+          "callback_url"=>$callback_url,
+          "error"=>$error
+      ]);
+      return redirect()->to("/login?".$query);
+  }
+  return loginRedirect($token, $callback_url, $credentials[0]);
+}
+
+
+function localRegister($credentials){
+  //create a user
+  $user = new App\User(["credential"=>$request->input(["credential"])]);
+  $user->password = app('hash')->make($request->input("password"));
+  $user->save();
+  // $user->token = createToken($user);
+  // $user->save();
+  return localLogin($credentials);
+}
+
+function remoteLogin($credentials){
+  $callback_url = \Illuminate\Support\Facades\Request::query("callback_url",url("/dashboard"));
+  $user = App\User::where("credential",$credentials[0])->firstOrCreate(); //just create the user if he doesn't exist yet
+  $client = new GuzzleHttp\Client([
+    "base_uri" => config("app.login_service")
+  ]);
+  $token = null;
+  $response = $client->post("/login",[
+    "email" => $credentials[0],
+    "password" => $credentials[1]
+  ]);
+  if($response->getStatusCode() == 200){
+    $token = json_decode($response->getBody())->userUid;
+  }
+  $user->token = $token;
+  $user->save();
+  return loginRedirect($token, $callback_url, $credentials[0]);
+}
+function remoteRegister($credentials){
+
+  $client = new GuzzleHttp\Client([
+    "base_uri" => config("app.login_service")
+  ]);
+  $token = null;
+  $response = $client->post("/register", [
+    "email" => $user->credential,
+    "password" => $credentials[1]
+  ]);
+  if($response->getStatusCode() != 200){
+    $user->destroy();
+    return redirect()->back();
+  }
+  $user = new App\User(["credential" => $credentials[0] ]);
+  $user->save();
+  return remoteLogin($credentials);
+}
+
 $router->get("/logout",function(Request $request){
     $callback_url = $request->get("callback_url",url("/login"));
     setcookie("token", "", time()-3600);
@@ -303,36 +393,44 @@ $router->get("/logout",function(Request $request){
 $router->post("/register", function(Request $request) {
     $callback_url = $request->get("callback_url",url("/dashboard"));
 
-    //create a user
-    $user = new App\User(["credential"=>$request->input(["credential"])]);
-    $user->password = app('hash')->make($request->input("password"));
-    $user->save();
-    $user->token = createToken($user);
-    $user->save();
-    $query = http_build_query([
+    $credentials = [
+      $request->input("credential"),
+      $request->input("password")
+    ];
+    if(app()->environment('local')){
+      return localRegister($credentials);
+    }
+    else{
+      return remoteRegister($credentials);
+    }
+    /*$query = http_build_query([
         "code"=>(string) $user->token,
         "credential"=>$user->credential,
         "callback_url"=>$callback_url
     ]);
-    return redirect()->to("/login/callback?".$query);
+    return redirect()->to("/login/callback?".$query);*/
 });
 
-function localLogin(){
-
-}
-function remoteLogin(){
-
-}
 /**
  * /login
  * This route will deliver you a token based on the user
  */
 $router->post("/login", function(Request $request) {
 
-  $callback_url = $request->query("callback_url",null);
+    $callback_url = $request->query("callback_url",null);
     $error = null;
-  //TODO this should be handled by remote api
-
+    //TODO this should be handled by remote api
+    $credentials = [
+      $request->input("credential"),
+      $request->input("password")
+    ];
+    if(app()->environment('local')){
+      return localLogin($credentials);
+    }
+    else{
+      return remoteLogin($credentials);
+    }
+    /*
     //check if we have a user
     $user = App\User::where("credential",$request->input("credential"))->first();
     if(!$user){
@@ -356,15 +454,12 @@ $router->post("/login", function(Request $request) {
             "error"=>$error
         ]);
         return redirect()->to("/login?".$query);
-    }
-    $query = http_build_query([
-        "code"=>(string) $token,
-        "credential"=>$user->credential,
-        "callback_url"=>$callback_url
-    ]);
+    }*/
 
-    return redirect()->to(url("/login/callback")."?".$query);
 });
+
+
+
 $router->get("/me",["middleware"=>"auth:",function(Request $request){
     //todo request the profile of the user based on token to the actual profile api
     //we should get the token of the user

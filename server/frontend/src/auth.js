@@ -6,7 +6,7 @@ class Auth {
     constructor(){
         this.data = {}
         if(! Auth.instance){
-            this.data.token = window.localStorage.getItem("token") || null
+            this.data.token = window.localStorage.getItem("token") || document.head.querySelector('meta[name="auth-token"]').content || null
             this.data.user = window.localStorage.getItem("user") || null
             if(this.data.token !== null){
                 this._login()

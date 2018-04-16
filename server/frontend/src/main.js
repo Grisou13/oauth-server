@@ -63,6 +63,7 @@ let auth = document.head.querySelector('meta[name="auth-token"]');
 
 if (auth) {
     window.axios.defaults.headers.common['Authorization'] = "Baerer " + auth.content;
+    Auth
 } else {
     console.error('Auth token not found');
 }
