@@ -25,6 +25,7 @@ class Auth {
     _login(){
         window.localStorage.setItem("token",this.data.token)
         window.axios.defaults.headers.common['Authorization'] = "Baerer" + " " + this.data.token;
+        window.axios.defaults.withCredentials = true
         console.log(this.data)
         EventBus.$emit(LOGIN_EVENT,this.data.token)
         axios.get("/me")
