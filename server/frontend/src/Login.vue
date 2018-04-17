@@ -2,7 +2,7 @@
 
     <div class="container">
         <div class="row">
-            <!--<form class="show-password log-in-form" method="post" action="/login?{{ window.location.query }}">-->
+            <form @submit.prevent="login" class="show-password log-in-form" method="post" action="/login">
                 <div class="col s12">
                     <div class="input-field col s12">
                         <label for="credential">Username / Email</label>
@@ -19,11 +19,11 @@
 
                     </div>
 
-                    <button @click="login()" type="submit" class="col s12 waves-effect waves-light btn light-blue darken-1"><span>Log-in<i class="material-icons right">send</i></span></button>
+                    <button  type="submit" class="col s12 waves-effect waves-light btn light-blue darken-1"><span>Log-in<i class="material-icons right">send</i></span></button>
 
                 </div>
 
-            <!--</form>-->
+            </form>
         </div>
 
         <div class="row">
@@ -42,7 +42,8 @@
         },
         methods:{
             login(){
-                Auth.login({...this})
+              console.log(this)
+                Auth.login({credential: this.credential, password: this.password})
             }
         }
     }

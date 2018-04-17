@@ -4,7 +4,7 @@ return [
     "key"=>env("APP_KEY",null),
     'cipher' => 'AES-256-CBC',
     'env' => env('APP_ENV', 'production'),
-    'login_service' => env("LOGIN_SERVICE", "http://localhost:88888"),
+    'login_service' => env("LOGIN_SERVICE", "http://localhost:8888"),
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

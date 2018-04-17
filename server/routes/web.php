@@ -297,13 +297,14 @@ function createToken($user){
 function loginRedirect($token, $callback_url, $username){
   $query = http_build_query([
       "code"=>(string) $token,
-      "credential"=>$credentials[0],
+      "credential"=>$username,
       "callback_url"=>$callback_url
   ]);
 
   return redirect()->to(url("/login/callback")."?".$query);
 }
 function localLogin($credentials){
+  $error = null;
   $callback_url = \Illuminate\Support\Facades\Request::query("callback_url",url("/dashboard"));
 
   //check if we have a user
@@ -324,8 +325,8 @@ function localLogin($credentials){
 
   $token = createToken($user);
   $user->token = $token;
-  $user->save()
-  
+  $user->save();
+
   if($error != null){
       $query = http_build_query([
           "callback_url"=>$callback_url,
@@ -339,8 +340,8 @@ function localLogin($credentials){
 
 function localRegister($credentials){
   //create a user
-  $user = new App\User(["credential"=>$request->input(["credential"])]);
-  $user->password = app('hash')->make($request->input("password"));
+  $user = new App\User(["credential"=>$credentials[0]]);
+  $user->password = app('hash')->make($credentials[1]);
   $user->save();
   // $user->token = createToken($user);
   // $user->save();
@@ -349,20 +350,24 @@ function localRegister($credentials){
 
 function remoteLogin($credentials){
   $callback_url = \Illuminate\Support\Facades\Request::query("callback_url",url("/dashboard"));
-  $user = App\User::where("credential",$credentials[0])->firstOrCreate(); //just create the user if he doesn't exist yet
+  $user = App\User::where("credential",$credentials[0])->firstOrNew(["credential" => $credentials[0]]); //just create the user if he doesn't exist yet
   $client = new GuzzleHttp\Client([
     "base_uri" => config("app.login_service")
   ]);
   $token = null;
   $response = $client->post("/login",[
-    "email" => $credentials[0],
-    "password" => $credentials[1]
+    "form_params" => [
+      "email" => $credentials[0],
+      "password" => $credentials[1]
+    ]
   ]);
   if($response->getStatusCode() == 200){
     $token = json_decode($response->getBody())->userUid;
   }
   $user->token = $token;
   $user->save();
+  if(\Illuminate\Support\Facades\Request::ajax())
+    return (string) $token;
   return loginRedirect($token, $callback_url, $credentials[0]);
 }
 function remoteRegister($credentials){
@@ -372,8 +377,10 @@ function remoteRegister($credentials){
   ]);
   $token = null;
   $response = $client->post("/register", [
-    "email" => $user->credential,
-    "password" => $credentials[1]
+    "form_params" => [
+      "email" => $credentials[0],
+      "password" => $credentials[1]
+    ]
   ]);
   if($response->getStatusCode() != 200){
     $user->destroy();
@@ -381,6 +388,8 @@ function remoteRegister($credentials){
   }
   $user = new App\User(["credential" => $credentials[0] ]);
   $user->save();
+  if(\Illuminate\Support\Facades\Request::ajax())
+    return $user->toJson();
   return remoteLogin($credentials);
 }
 

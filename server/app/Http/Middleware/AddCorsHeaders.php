@@ -3,8 +3,13 @@ namespace App\Http\Middleware;
 use Closure;
 class AddCorsHeaders
 {
-    protected $headers =  [
-        "Access-Control-Allow-Origin"=>"http://localhost:8080",
+  protected $headers =  [
+
+  ];
+
+  public function __construct(){
+    $this->headers =  [
+        "Access-Control-Allow-Origin"=> env("APP_DOMAIN","http://localhost:8080"),
         "Access-Control-Allow-Headers" => "X-Requested-With, Content-Type, X-Access-Token, x-access-token, Authorization, api_key, x-xsrf-token",
         // "Access-Control-Allow-Headers" => "True",
         "Access-Control-Request-Method"=>"GET, POST, PUT, PATCH, DELETE, OPTIONS",
@@ -13,6 +18,8 @@ class AddCorsHeaders
         "Access-Control-Max-Age"=>0,
         "Access-Control-Allow-Credentials"=>'true'
     ];
+  }
+
     public function handle($request, Closure $next)
     {
 
@@ -23,7 +30,7 @@ class AddCorsHeaders
          * @var $response \Illuminate\Http\Response
          */
         $response = $next($request);
-        if(config("app.env") === "production"){
+        if($request->is("api/*")){
 
             $this->headers["Access-Control-Allow-Origin"] = "*";
         }

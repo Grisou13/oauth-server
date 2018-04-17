@@ -6,7 +6,18 @@ class Auth {
     constructor(){
         this.data = {}
         if(! Auth.instance){
-            this.data.token = window.localStorage.getItem("token") || document.head.querySelector('meta[name="auth-token"]').content || null
+          switch(true){
+            case window.localStorage.getItem("token"):
+              this.data.token = window.localStorage.getItem("token")
+              break;
+            case document.head.querySelector('meta[name="auth-token"]'):
+              this.data.token = document.head.querySelector('meta[name="auth-token"]').content
+              break;
+            default:
+                this.data.token = null;
+                break;
+          }
+            // this.data.token = window.localStorage.getItem("token") || document.head.querySelector('meta[name="auth-token"]').content || null
             this.data.user = window.localStorage.getItem("user") || null
             if(this.data.token !== null){
                 this._login()
@@ -44,7 +55,11 @@ class Auth {
             })
     }
     register(credentials){
-        return axios.post("/register",{...credentials}).then(resp => this.login(credentials))
+      var self = this
+        return axios.post("/register",{...credentials}).then(resp => {
+          debugger;
+          self.login(credentials.credential, credentials.password)
+        })
     }
     logout(){
         window.localStorage.removeItem("user")
