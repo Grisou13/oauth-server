@@ -355,6 +355,7 @@ function remoteLogin($credentials){
     "base_uri" => config("app.login_service")
   ]);
   $token = null;
+  dd($credentials);
   $response = $client->post("/login",[
     "form_params" => [
       "email" => $credentials[0],

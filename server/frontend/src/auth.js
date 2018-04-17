@@ -57,8 +57,7 @@ class Auth {
     register(credentials){
       var self = this
         return axios.post("/register",{...credentials}).then(resp => {
-          debugger;
-          self.login(credentials.credential, credentials.password)
+          this.login(credentials)
         })
     }
     logout(){
