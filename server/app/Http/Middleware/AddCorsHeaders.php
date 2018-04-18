@@ -19,6 +19,26 @@ class AddCorsHeaders
         "Access-Control-Allow-Credentials"=>'true'
     ];
   }
+  function validateOrigin($allowed, $input)
+{
+    if ($allowed == '*') {
+        return '*';
+    }
+
+    $allowed = preg_quote($allowed, '/');
+
+    if (($wildcardPos = strpos($allowed, '\*')) !== false) {
+        $allowed = str_replace('\*', '(.*)', $allowed);
+    }
+
+    $regexp = '/^' . $allowed . '$/';
+
+    if (!preg_match($regexp, $input, $matches)) {
+        return 'none';
+    }
+
+    return $input;
+}
 
     public function handle($request, Closure $next)
     {
@@ -30,9 +50,16 @@ class AddCorsHeaders
          * @var $response \Illuminate\Http\Response
          */
         $response = $next($request);
-        
+
         if (isset($_SERVER['HTTP_ORIGIN'])) {
           $this->headers["Access-Control-Allow-Origin"] = $_SERVER["HTTP_ORIGIN"];
+
+          /*
+          // TODO define if prod should handle multiple origins or only the defined domain?
+          $this->headers["Access-Control-Allow-Origin"] = $this->validateOrigin("localhost:*",$_SERVER["HTTP_ORIGIN"]);
+          $this->headers["Access-Control-Allow-Origin"] = $this->validateOrigin("*cpnv*",$_SERVER["HTTP_ORIGIN"]);
+          */
+
         }
         if($request->is("api/*")){
             $this->headers["Access-Control-Allow-Origin"] = "*";
