@@ -355,7 +355,7 @@ function remoteLogin($credentials){
     "base_uri" => config("app.login_service")
   ]);
   $token = null;
-  dd($credentials);
+  //dd($credentials);
   $response = $client->post("/login",[
     "form_params" => [
       "email" => $credentials[0],
@@ -372,7 +372,7 @@ function remoteLogin($credentials){
   return loginRedirect($token, $callback_url, $credentials[0]);
 }
 function remoteRegister($credentials){
-
+  // dd($credentials);
   $client = new GuzzleHttp\Client([
     "base_uri" => config("app.login_service")
   ]);

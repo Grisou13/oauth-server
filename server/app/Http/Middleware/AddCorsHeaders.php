@@ -30,8 +30,11 @@ class AddCorsHeaders
          * @var $response \Illuminate\Http\Response
          */
         $response = $next($request);
+        
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+          $this->headers["Access-Control-Allow-Origin"] = $_SERVER["HTTP_ORIGIN"];
+        }
         if($request->is("api/*")){
-
             $this->headers["Access-Control-Allow-Origin"] = "*";
         }
         $this->attachHeaders($response);
