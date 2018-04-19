@@ -40,7 +40,7 @@ class Authenticate
             if($request->ajax())
                 return response('Unauthorized.', 401);
             else
-                return redirect()->to("/login");
+                return redirect()->to("/login?callback_url=".urlencode($request->fullUrl()));
         }
 
         return $next($request);

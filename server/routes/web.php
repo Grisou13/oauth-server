@@ -365,7 +365,10 @@ function remoteLogin($credentials){
   if($response->getStatusCode() == 200){
     $token = json_decode($response->getBody())->userUid;
   }
-  $user->token = $token;
+  $user->save(); //create the user if need be
+
+  $user->remember_token = $token;
+  $user->token = createToken($user);
   $user->save();
   if(\Illuminate\Support\Facades\Request::ajax())
     return (string) $token;

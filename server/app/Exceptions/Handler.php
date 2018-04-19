@@ -52,7 +52,6 @@ class Handler extends ExceptionHandler
 
     protected function unauthenticated(Request $request, AuthenticationException $exception)
     {
-        dd("TAMER");
         if ($request->expectsJson()) {
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }

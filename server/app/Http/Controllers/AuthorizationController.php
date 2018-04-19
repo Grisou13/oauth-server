@@ -17,6 +17,10 @@ use Illuminate\Contracts\Routing\ResponseFactory;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
 
 use League\OAuth2\Server\Exception\OAuthServerException;
+
+use App\Scope;
+
+
 class AuthorizationController
 {
     use HandlesOAuthErrors;
@@ -78,21 +82,22 @@ class AuthorizationController
                 //     $scopes = $project->scopes;
                 // });
                 // all the scopes the user has access to
-                $scopesAccessible = Scope::whereHas("project",function($query){
-                  return $query->whereIn("name", $projectNames)->whereHas("approvals",function($query){
+                //dd($projectNames);
+                $scopesAccessible = Scope::whereHas("project",function($query) use ($projectNames, $client){
+                  return $query->whereIn("name", $projectNames)->whereHas("approvals",function($query) use ($client){
                       return $query->where("approved",true)->where("user_id",$client->user_id);
                   });
-                })->get("name"); //->whereIn("name",collect($scopes)->pluck('id')->all())
+                })->get()->pluck("name"); //->whereIn("name",collect($scopes)->pluck('id')->all())
 
                 // all the scopes the user has created
-                $myScopes = Scope::whereHas("project",function($query){
+                $myScopes = Scope::whereHas("project",function($query) use ($client){
                   return $query->where("user_id",$client->user_id);
-                })->get("name");
+                })->get()->pluck("name");
 
                 $scopesAccessible = $scopesAccessible->merge($myScopes);
 
-                $scopes = collect($scopes)->filter(function($s){
-                  return $scopesAccessible->contains($s["id"]);
+                $scopes = collect($scopes)->filter(function($s) use ($scopesAccessible){
+                  return $scopesAccessible->contains($s->id);
                 });
                 //dd($scopes,$scopesAccessible);
                 // input scopes

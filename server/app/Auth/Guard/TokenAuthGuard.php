@@ -49,24 +49,29 @@ class TokenAuthGuard implements Guard
         if (!is_null($this->user)) {
             return $this->user;
         }
-        if ($this->request->cookie("token")) {
-
-            $token = (new Parser())->parse((string) $this->request->cookie("token")); // Parses from a string
-            return $this->getUserFromToken($token);
+        $token = $this->request->cookie("token");
+        if(!$token){
+          $token = $this->request->header("Authorization");
+          if(!empty($token))
+            $token = explode(" ",$token)[1];
+          else
+            return null;
         }
-        if ($this->request->cookie("token")) {
-            $header = (string) $this->request->header("Authorization");
 
-            $token = (new Parser())->parse(explode(" ",$header)[1]); // Parses from a string
-            return $this->getUserFromToken($token);
-        }
-        return null;
+        return $this->getUserFromToken($token);
+
     }
-    protected function getUserFromToken(Token $token){
+    protected function getUserFromToken(string $token){
+      try{
+        $token = (new Parser())->parse($token);
         $id = $token->getClaim('uid');
         return $this->user = $this->provider->retrieveById($id);
-    }
+      }catch(\Exception $e){
+        //TODO implement own provider
+        return $this->user = \App\User::where("token",$token)->first(); //just hard code this
+      }
 
+    }
 
 
     /**
