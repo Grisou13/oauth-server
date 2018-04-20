@@ -356,7 +356,7 @@ function remoteLogin($credentials){
   ]);
   $token = null;
   //dd($credentials);
-  $response = $client->post("/login",[
+  $response = $client->post("login",[
     "form_params" => [
       "email" => $credentials[0],
       "password" => $credentials[1]
@@ -380,7 +380,7 @@ function remoteRegister($credentials){
     "base_uri" => config("app.login_service")
   ]);
   $token = null;
-  $response = $client->post("/register", [
+  $response = $client->post("register", [
     "form_params" => [
       "email" => $credentials[0],
       "password" => $credentials[1]
