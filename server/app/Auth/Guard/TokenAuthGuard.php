@@ -68,7 +68,7 @@ class TokenAuthGuard implements Guard
         return $this->user = $this->provider->retrieveById($id);
       }catch(\Exception $e){
         //TODO implement own provider
-        return $this->user = \App\User::where("token",$token)->first(); //just hard code this
+        return $this->user = \App\User::where("remember_token",$token)->orWhere("token",$token)->first(); //just hard code this
       }
 
     }
